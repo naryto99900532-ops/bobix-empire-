@@ -1,20 +1,44 @@
-<!-- В навигацию -->
-<button id="loginBtn" class="yellow-btn">Log In</button>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Clan Info - Главная</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <a href="#">О нас</a>
+            </div>
+            <div class="nav-right">
+                <button id="loginBtn" class="btn-yellow">Log In</button>
+            </div>
+        </nav>
+    </header>
 
-<!-- Модальное окно -->
-<div id="authModal" class="modal">
-    <div class="modal-content">
-        <h2 id="modalTitle">Вход</h2>
-        <form id="authForm">
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="text" id="username" placeholder="Никнейм" class="reg-only" style="display:none">
-            <input type="password" id="password" placeholder="Пароль" required>
-            <input type="password" id="confirmPassword" placeholder="Повторите пароль" class="reg-only" style="display:none">
-            <button type="submit" id="submitAuth">Войти</button>
-        </form>
-        <p id="toggleAuth">Нет аккаунта? Регистрация</p>
+    <main>
+        <h1>Добро пожаловать в наш клан</h1>
+        <p>Здесь будет общая информация.</p>
+    </main>
+
+    <!-- Модальное окно -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <h2 id="authTitle">Вход</h2>
+            <form id="authForm">
+                <input type="email" id="email" placeholder="Электронная почта" required>
+                <input type="text" id="username" placeholder="Ваш никнейм" class="reg-field" style="display:none">
+                <input type="password" id="password" placeholder="Пароль" required>
+                <input type="password" id="confirmPass" placeholder="Повторите пароль" class="reg-field" style="display:none">
+                <button type="submit" id="submitBtn" class="btn-yellow">Войти</button>
+            </form>
+            <span id="toggleAuth">Нет аккаунта? Регистрация</span>
+        </div>
     </div>
-</div>
-<script src="https://cdn.jsdelivr.net"></script>
-<script src="db.js"></script>
-<script src="auth.js"></script>
+
+    <script src="https://cdn.jsdelivr.net"></script>
+    <script src="db.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>
