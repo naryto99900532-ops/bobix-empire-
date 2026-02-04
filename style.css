@@ -1,5 +1,18 @@
-:root { --yellow: #ffcc00; --black: #1a1a1a; }
-.yellow-btn { background: var(--yellow); color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
-.modal { background: rgba(0,0,0,0.9); position: fixed; top:0; left:0; width:100%; height:100%; display:none; justify-content: center; align-items: center; }
-.modal-content { background: var(--black); border: 2px solid var(--yellow); padding: 30px; color: white; width: 300px; }
-input { width: 100%; margin-bottom: 10px; background: #333; border: 1px solid var(--yellow); color: white; padding: 8px; }
+body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+header { padding: 20px; border-bottom: 2px solid #ffcc00; }
+nav { display: flex; justify-content: space-between; align-items: center; }
+.btn-yellow { background: #ffcc00; color: #000; border: none; padding: 10px 25px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+.btn-yellow:hover { background: #e6b800; }
+
+/* Модалка */
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
+.modal-content { background: #1a1a1a; padding: 40px; border: 2px solid #ffcc00; width: 320px; text-align: center; }
+input { width: 100%; padding: 12px; margin: 10px 0; background: #333; border: 1px solid #ffcc00; color: #fff; box-sizing: border-box; }
+#toggleAuth { font-size: 12px; color: #ffcc00; cursor: pointer; text-decoration: underline; margin-top: 15px; display: block; }
+
+/* Dashboard Layout */
+.dashboard-container { display: flex; height: 100vh; }
+.sidebar { width: 250px; background: #111; border-right: 2px solid #ffcc00; padding: 20px; }
+.sidebar button { width: 100%; background: none; border: 1px solid #ffcc00; color: #ffcc00; padding: 15px; margin-bottom: 10px; cursor: pointer; text-align: left; }
+.sidebar button:hover { background: #ffcc00; color: #000; }
+.content-area { flex: 1; padding: 40px; }
