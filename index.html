@@ -1,0 +1,20 @@
+<!-- В навигацию -->
+<button id="loginBtn" class="yellow-btn">Log In</button>
+
+<!-- Модальное окно -->
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle">Вход</h2>
+        <form id="authForm">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="text" id="username" placeholder="Никнейм" class="reg-only" style="display:none">
+            <input type="password" id="password" placeholder="Пароль" required>
+            <input type="password" id="confirmPassword" placeholder="Повторите пароль" class="reg-only" style="display:none">
+            <button type="submit" id="submitAuth">Войти</button>
+        </form>
+        <p id="toggleAuth">Нет аккаунта? Регистрация</p>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net"></script>
+<script src="db.js"></script>
+<script src="auth.js"></script>
