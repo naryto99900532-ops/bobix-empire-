@@ -72,30 +72,49 @@ async function loadUserData() {
         const userRoleElement = document.getElementById('userRole');
         
         if (userNameElement) {
-            userNameElement.textContent = currentUser.user_metadata?.username || currentUser.email || 'Пользователь';
+            userNameElement.textContent = currentUser.user_metadata?.username || 
+                                         currentUser.email?.split('@')[0] || 
+                                         'Пользователь';
         }
         
         if (userAvatarElement) {
-            const initials = (currentUser.user_metadata?.username || 'BC').substring(0, 2).toUpperCase();
+            const initials = (currentUser.user_metadata?.username || 
+                            currentUser.email?.split('@')[0] || 
+                            'BC').substring(0, 2).toUpperCase();
             userAvatarElement.textContent = initials;
         }
         
-        // Получаем роль пользователя из профиля
-        const { data: profile, error } = await _supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', currentUser.id)
-            .single();
+        // Пытаемся получить роль пользователя из профиля
+        let profileRole = 'user';
         
-        if (!error && profile) {
-            currentUserRole = profile.role || 'user';
+        try {
+            const { data: profile, error } = await _supabase
+                .from('profiles')
+                .select('role, username')
+                .eq('id', currentUser.id)
+                .maybeSingle(); // Используем maybeSingle вместо single
             
-            if (userRoleElement) {
-                userRoleElement.textContent = getRoleDisplayName(currentUserRole);
+            if (!error && profile) {
+                profileRole = profile.role || 'user';
+                
+                // Обновляем имя пользователя если есть в профиле
+                if (profile.username && userNameElement) {
+                    userNameElement.textContent = profile.username;
+                }
+            } else if (error) {
+                console.log('Профиль не найден или ошибка:', error);
+                // Создаем профиль если его нет
+                await createUserProfile();
             }
-        } else {
-            // Если профиля нет, создаем его
-            await createUserProfile();
+        } catch (profileError) {
+            console.error('Ошибка при запросе профиля:', profileError);
+            profileRole = 'user';
+        }
+        
+        currentUserRole = profileRole;
+        
+        if (userRoleElement) {
+            userRoleElement.textContent = getRoleDisplayName(currentUserRole);
         }
         
     } catch (error) {
