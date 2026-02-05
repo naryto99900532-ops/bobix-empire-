@@ -285,17 +285,35 @@ async function loadPlayers() {
             </div>
         `;
         
-        // Получаем игроков из базы данных
-        const { data: players, error } = await _supabase
-            .from('players')
-            .select('*')
-            .order('score', { ascending: false });
+        // Пытаемся получить игроков
+        let players = [];
         
-        if (error) {
-            throw error;
+        try {
+            const { data, error } = await _supabase
+                .from('players')
+                .select('*')
+                .order('score', { ascending: false })
+                .limit(100); // Ограничиваем количество для безопасности
+            
+            if (error) {
+                throw error;
+            }
+            
+            players = data || [];
+            
+        } catch (dbError) {
+            console.error('Ошибка БД при загрузке игроков:', dbError);
+            
+            // Показываем тестовые данные если БД недоступна
+            if (dbError.message.includes('profiles') || dbError.message.includes('recursion')) {
+                players = getTestPlayers();
+                showNotification('Используются тестовые данные. Проверьте настройки БД.', 'warning');
+            } else {
+                throw dbError;
+            }
         }
         
-        playersData = players || [];
+        playersData = players;
         
         // Обновляем список игроков в интерфейсе
         renderPlayersList(playersData);
@@ -304,14 +322,53 @@ async function loadPlayers() {
         updateAdminStats();
         
     } catch (error) {
-        console.error('Ошибка загрузки игроков:', error);
+        console.error('Критическая ошибка загрузки игроков:', error);
         document.getElementById('playersList').innerHTML = `
             <div class="error-message">
                 <p>Ошибка загрузки игроков: ${error.message}</p>
+                <p>Проверьте настройки таблицы players в Supabase.</p>
                 <button class="admin-btn" onclick="loadPlayers()">Повторить попытку</button>
+                <button class="admin-btn" onclick="useTestData()">Использовать тестовые данные</button>
             </div>
         `;
     }
+}
+
+/**
+ * Тестовые данные для демонстрации
+ */
+function getTestPlayers() {
+    return [
+        {
+            id: '1',
+            nickname: 'Sayrex',
+            score: 1000,
+            description: 'Король разрушений',
+            threshold_power: 4,
+            threshold_accuracy: 4,
+            threshold_defense: 3,
+            threshold_speed: 2
+        },
+        {
+            id: '2',
+            nickname: 'Marfet',
+            score: 850,
+            description: 'Железная крепость',
+            threshold_power: 1,
+            threshold_accuracy: 1,
+            threshold_defense: 3,
+            threshold_speed: 1
+        }
+    ];
+}
+
+/**
+ * Использовать тестовые данные
+ */
+function useTestData() {
+    playersData = getTestPlayers();
+    renderPlayersList(playersData);
+    showNotification('Загружены тестовые данные', 'info');
 }
 
 /**
