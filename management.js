@@ -1191,3 +1191,58 @@ if (typeof window !== 'undefined') {
     window.clearAddForm = clearAddForm;
     window.logout = logout;
 }
+// Обновляем функцию обновления UI по ролям
+function updateUIByRole() {
+    const adminElements = document.querySelectorAll('.admin-only');
+    const ownerElements = document.querySelectorAll('.owner-only');
+    const adminPanelNav = document.querySelector('[data-section="admin-panel"]');
+    const ownerPanelNav = document.querySelector('[data-section="owner-panel"]');
+    const administratorsNav = document.querySelector('[data-section="administrators"]');
+    
+    // Показываем/скрываем элементы в зависимости от роли
+    if (currentUserRole === 'admin' || currentUserRole === 'owner') {
+        adminElements.forEach(el => el.style.display = 'block');
+        if (adminPanelNav) adminPanelNav.style.display = 'flex';
+        if (administratorsNav) administratorsNav.style.display = 'flex';
+    }
+    
+    if (currentUserRole === 'owner') {
+        ownerElements.forEach(el => el.style.display = 'block');
+        if (ownerPanelNav) ownerPanelNav.style.display = 'flex';
+    }
+}
+
+// Обновляем загрузку данных для секций
+async function loadSectionData(sectionId) {
+    switch (sectionId) {
+        case 'clan-players':
+            await loadPlayers();
+            break;
+        case 'top-clan':
+            await loadTopPlayers();
+            break;
+        case 'admin-panel':
+            await loadAdminPanelData();
+            break;
+        case 'owner-panel':
+            await loadOwnerPanelData();
+            break;
+        case 'administrators':
+            await loadAdministrators();
+            break;
+    }
+}
+
+// Функция загрузки данных для админ панели
+async function loadAdminPanelData() {
+    await loadPlayers();
+    updatePlayerStats();
+}
+
+// Функция загрузки данных для панели владельца
+async function loadOwnerPanelData() {
+    await loadAdministrators();
+}
+
+// Переопределяем функцию рендера игроков для использования новой
+window.renderPlayersList = updatePlayersRender;
