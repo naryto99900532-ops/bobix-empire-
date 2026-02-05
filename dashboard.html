@@ -8,7 +8,39 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Russo+One&display=swap" rel="stylesheet">
     <style>
         /* ТВОИ ОРИГИНАЛЬНЫЕ СТИЛИ ПОЛНОСТЬЮ */
-        *  {
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #000000; --secondary: #0a0a0a; --accent: #ffd700;
+            --accent-dark: #b8860b; --accent-glow: #ffed4a; --text: #ffffff;
+            --text-secondary: #cccccc; --card-bg: #111111; --border: #333333;
+        }
+        body {
+            background-color: var(--primary); color: var(--text);
+            font-family: 'Orbitron', sans-serif; line-height: 1.6;
+            min-height: 100vh; overflow-x: hidden;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 20%);
+        }
+        .grid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255, 215, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 215, 0, 0.03) 1px, transparent 1px); background-size: 50px 50px; z-index: -1; }
+        header { background-color: rgba(0, 0, 0, 0.95); padding: 1.2rem 0; position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 3px solid var(--accent); backdrop-filter: blur(10px); box-shadow: 0 5px 20px rgba(255, 215, 0, 0.2); }
+        .header-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; }
+        .logo { display: flex; align-items: center; gap: 15px; cursor: pointer; transition: transform 0.3s; }
+        .logo-icon { color: var(--accent); font-size: 3rem; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7)); }
+        .logo-text { font-family: 'Russo One', sans-serif; font-size: 2.5rem; font-weight: 400; letter-spacing: 2px; background: linear-gradient(to right, var(--accent), var(--accent-glow)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+        nav ul { display: flex; list-style: none; gap: 1.8rem; }
+        nav a { color: var(--text); text-decoration: none; font-weight: 600; font-size: 1.1rem; padding: 0.6rem 1.5rem; border-radius: 30px; transition: all 0.3s ease; position: relative; background-color: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); cursor: pointer; }
+        nav a:hover { background-color: rgba(255, 215, 0, 0.3); color: var(--accent); box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+        nav a.active { background-color: var(--accent); color: #000; box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); font-weight: 800; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; margin-top: 100px; }
+        .thresholds-info { background-color: rgba(17, 17, 17, 0.9); border-radius: 15px; padding: 3rem; margin-bottom: 4rem; border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); position: relative; overflow: hidden; }
+        .thresholds-info h2 { font-size: 2.8rem; margin-bottom: 2rem; color: var(--accent); text-align: center; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        .threshold-types { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .threshold-card { background-color: rgba(0, 0, 0, 0.7); border-radius: 10px; padding: 2rem; border: 1px solid rgba(255, 215, 0, 0.3); transition: all 0.3s ease; }
+        .threshold-number { display: inline-block; background-color: var(--accent); color: #000; font-weight: 900; font-size: 1.5rem; width: 40px; height: 40px; border-radius: 50%; text-align: center; line-height: 40px; margin-bottom: 1.5rem; }
+        .hero { text-align: center; padding: 5rem 2rem; background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(17, 17, 17, 0.9) 100%); border-radius: 20px; margin-bottom: 4rem; position: relative; overflow: hidden; border: 2px solid var(--accent); box-shadow: 0 0 40px rgba(255, 215, 0, 0.2); }
+        .hero h1 { font-size: 4.5rem; margin-bottom: 1.5rem; color: var(--accent); text-shadow: 0 0 20px rgba(255, 215, 0, 0.7); letter-spacing: 3px; }
+        .btn { display: inline-block; background: linear-gradient(45deg, var(--accent), var(--accent-glow)); color: #000; padding: 1.2rem 3rem; border-radius: 50px; text-decoration: none; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; }
+
+         {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -588,429 +620,12 @@
             }
         }
 
-        { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #000000; --secondary: #0a0a0a; --accent: #ffd700;
-            --accent-dark: #b8860b; --accent-glow: #ffed4a; --text: #ffffff;
-            --text-secondary: #cccccc; --card-bg: #111111; --border: #333333;
-        }
-        body {
-            background-color: var(--primary); color: var(--text);
-            font-family: 'Orbitron', sans-serif; line-height: 1.6;
-            min-height: 100vh; overflow-x: hidden;
-            background-image: radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 20%);
-        }
-        .grid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255, 215, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 215, 0, 0.03) 1px, transparent 1px); background-size: 50px 50px; z-index: -1; }
-        header { background-color: rgba(0, 0, 0, 0.95); padding: 1.2rem 0; position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 3px solid var(--accent); backdrop-filter: blur(10px); box-shadow: 0 5px 20px rgba(255, 215, 0, 0.2); }
-        .header-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; }
-        .logo { display: flex; align-items: center; gap: 15px; cursor: pointer; transition: transform 0.3s; }
-        .logo-icon { color: var(--accent); font-size: 3rem; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7)); }
-        .logo-text { font-family: 'Russo One', sans-serif; font-size: 2.5rem; font-weight: 400; letter-spacing: 2px; background: linear-gradient(to right, var(--accent), var(--accent-glow)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-        nav ul { display: flex; list-style: none; gap: 1.8rem; }
-        nav a { color: var(--text); text-decoration: none; font-weight: 600; font-size: 1.1rem; padding: 0.6rem 1.5rem; border-radius: 30px; transition: all 0.3s ease; position: relative; background-color: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); cursor: pointer; }
-        nav a:hover { background-color: rgba(255, 215, 0, 0.3); color: var(--accent); box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
-        nav a.active { background-color: var(--accent); color: #000; box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); font-weight: 800; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; margin-top: 100px; }
-        .thresholds-info { background-color: rgba(17, 17, 17, 0.9); border-radius: 15px; padding: 3rem; margin-bottom: 4rem; border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); position: relative; overflow: hidden; }
-        .thresholds-info h2 { font-size: 2.8rem; margin-bottom: 2rem; color: var(--accent); text-align: center; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        .threshold-types { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem; }
-        .threshold-card { background-color: rgba(0, 0, 0, 0.7); border-radius: 10px; padding: 2rem; border: 1px solid rgba(255, 215, 0, 0.3); transition: all 0.3s ease; }
-        .threshold-number { display: inline-block; background-color: var(--accent); color: #000; font-weight: 900; font-size: 1.5rem; width: 40px; height: 40px; border-radius: 50%; text-align: center; line-height: 40px; margin-bottom: 1.5rem; }
-        .hero { text-align: center; padding: 5rem 2rem; background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(17, 17, 17, 0.9) 100%); border-radius: 20px; margin-bottom: 4rem; position: relative; overflow: hidden; border: 2px solid var(--accent); box-shadow: 0 0 40px rgba(255, 215, 0, 0.2); }
-        .hero h1 { font-size: 4.5rem; margin-bottom: 1.5rem; color: var(--accent); text-shadow: 0 0 20px rgba(255, 215, 0, 0.7); letter-spacing: 3px; }
-        .btn { display: inline-block; background: linear-gradient(45deg, var(--accent), var(--accent-glow)); color: #000; padding: 1.2rem 3rem; border-radius: 50px; text-decoration: none; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; }
-        
         /* ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ РЕДАКТИРОВАНИЯ */
         .edit-input { background: #222; border: 1px solid var(--accent); color: white; padding: 10px; width: 100%; margin: 5px 0; font-family: 'Orbitron'; }
         .admin-controls { margin-top: 15px; display: flex; gap: 10px; }
     </style>
 </head>
 <body>
-     <!-- Фон с сеткой -->
-    <div class="grid-bg"></div>
-    
-    <!-- Шапка сайта -->
-    <header>
-        <div class="header-container">
-            <div class="logo">
-                <i class="fas fa-crown logo-icon"></i>
-                <div class="logo-text">BOBIX <span>CORPORATION</span></div>
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="#home" class="active"><i class="fas fa-home"></i> Главная</a></li>
-                    <li><a href="#thresholds"><i class="fas fa-layer-group"></i> Пороги</a></li>
-                    <li><a href="#top"><i class="fas fa-trophy"></i> Топ игроков</a></li>
-                    <li><a href="#about"><i class="fas fa-info-circle"></i> О нас</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Основной контент -->
-    <main class="container">
-        <!-- Секция объяснения порогов -->
-        <section class="thresholds-info fade-in" id="thresholds">
-            <h2>СИСТЕМА ПОРОГОВ</h2>
-            <p><strong>Порог</strong> - это путь, который выбрал игрок и развивает свой порог, чтобы стать сильным.</p>
-            <p><strong>Порог делится на 4 типа:</strong></p>
-            
-            <div class="threshold-types">
-                <div class="threshold-card">
-                    <div class="threshold-number">1</div>
-                    <h3>Порог Силы</h3>
-                    <p>Нанесение увечий, скорость нанесения увечий и урона. Игроки, развивающие этот порог, становятся непревзойденными в нанесении урона.</p>
-                </div>
-                
-                <div class="threshold-card">
-                    <div class="threshold-number">2</div>
-                    <h3>Порог Меткости</h3>
-                    <p>Путь и развитие меткости (Aim). Мастера этого порога поражают цели с невероятной точностью даже на больших расстояниях.</p>
-                </div>
-                
-                <div class="threshold-card">
-                    <div class="threshold-number">3</div>
-                    <h3>Порог Защиты</h3>
-                    <p>Умение блокировать и парировать атаки противника. Непробиваемая защита - отличительная черта мастеров этого порога.</p>
-                </div>
-                
-                <div class="threshold-card">
-                    <div class="threshold-number">4</div>
-                    <h3>Порог Скорости</h3>
-                    <p>Управление темпом игры и быстрое использование комбо. Игроки, достигшие высот в этом пороге, практически неуловимы.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Герой секция -->
-        <section class="hero fade-in" id="home">
-            <h1>ЭЛИТА SHINDO LIFE</h1>
-            <p>Bobix Corporation объединяет сильнейших игроков Shindo Life, каждый из которых выбрал свой уникальный путь развития через систему порогов. Здесь представлены чемпионы, достигшие вершин в своих специализациях.</p>
-            <a href="#top" class="btn">ТОП ИГРОКОВ КОРПОРАЦИИ</a>
-        </section>
-
-        <!-- Секция с топом игроков -->
-        <section class="top-players-section" id="top">
-            <h2 class="section-title fade-in">ТОП 9 ИГРОКОВ BOBIX CORPORATION</h2>
-            <div class="players-container">
-                <!-- Игрок 1 -->
-                <div class="player-card fade-in">
-                    <div class="player-rank">TOP 1</div>
-                    <div class="player-info">
-                        <div class="player-avatar">
-                            <i class="fas fa-fire"></i>
-                        </div>
-                        <div>
-                            <h3 class="player-name">Sayrex</h3>
-                            <div class="player-title">Король разрушений</div>
-                        </div>
-                    </div>
-                    <div class="threshold-badges">
-                        <div class="threshold-badge">Порог Силы: 4 ур.</div>
-                        <div class="threshold-badge">Порог Меткости: 4 ур.</div>
-                        <div class="threshold-badge">Порог Защиты: 3 ур.</div>
-                        <div class="threshold-badge">Порог Скорости: 2 ур.</div>
-                    </div>
-                    <p class="player-description">Абсолютный чемпион с максимальным развитием порогов силы и меткости. Его атаки сокрушают все на своем пути.</p>
-                </div>
-
-                <!-- Игрок 2 -->
-                <div class="player-card fade-in">
-                    <div class="player-rank">TOP 2</div>
-                    <div class="player-info">
-                        <div class="player-avatar">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div>
-                            <h3 class="player-name">Marfet</h3>
-                            <div class="player-title">Железная крепость</div>
-                        </div>
-                    </div>
-                    <div class="threshold-badges">
-                        <div class="threshold-badge">Порог Силы: 1 ур.</div>
-                        <div class="threshold-badge">Порог Меткости: 1 ур.</div>
-                        <div class="threshold-badge">Порог Защиты: 3 ур.</div>
-                        <div class="threshold-badge">Порог Скорости: 1 ур.</div>
-                    </div>
-                    <p class="player-description">Непробиваемый защитник. Его оборонительные способности легендарны - ни одна атака не может пробить его защиту.</p>
-                </div>
-
-                <!-- Игрок 3 -->
-                <div class="player-card fade-in">
-                    <div class="player-rank">TOP 3</div>
-                    <div class="player-info">
-                        <div class="player-avatar">
-                            <i class="fas fa-crosshairs"></i>
-                        </div>
-                        <div>
-                            <h3 class="player-name">Decro</h3>
-                            <div class="player-title">God the mark</div>
-                        </div>
-                    </div>
-                    <div class="threshold-badges">
-                        <div class="threshold-badge">Порог Силы: 3-4 ур.</div>
-                        <div class="threshold-badge">Порог Меткости: 3 ур.</div>
-                        <div class="threshold-badge">Порог Защиты: 2 ур.</div>
-                        <div class="threshold-badge">Порог Скорости: 4 ур.</div>
-                    </div>
-                    <p class="player-description">Божество меткости и скорости. Его атаки всегда находят цель, а скорость движений превосходит человеческое восприятие.</p>
-                </div>
-
-                <!-- Игрок 4 -->
-                <div class="player-card fade-in">
-                    <div class="player-rank">TOP 4</div>
-                    <div class="player-info">
-                        <div class="player-avatar">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <div>
-                            <h3 class="player-name">Phoenix</h3>
-                            <div class="player-title">The fastest in history</div>
-                        </div>
-                    </div>
-                    <div class="threshold-badges">
-                        <div class="threshold-badge">Порог Силы: 1 ур.</div>
-                        <div class="threshold-badge">Порог Меткости: 2 ур.</div>
-                        <div class="threshold-badge">Порог Скорости: 4 ур.</div>
-                    </div>
-                    <p class="player-description">Самый быстрый игрок в истории Bobix Corporation. Его скорость настолько велика, что противники не успевают реагировать.</p>
-                </div>
-
-                <!-- Игрок 5 -->
-                <div class="player-card fade-in">
-                    <div class="player-rank">TOP 5</div>
-                    <div class="player-info">
-                        <div class="player-avatar">
-                            <i class="fas fa-dragon"></i>
-                        </div>
-                        <div>
-                            <h3 class="player-name">Zaduder</h3>
-                            <div class="player-title">Скрытый дракон</div>
-                        </div>
-                    </div>
-                    <div class="threshold-badges">
-                        <div class="threshold-badge empty">Не обладает порогами</div>
-                    </div>
-                    <p class="player-description">Загадочный игрок, не развивающий традиционные пороги. Его сила происходит из неизвестного источника, что делает его непредсказуемым.</p>
-                </div>
-
-                <!-- Игрок 6 -->
-                <div class="player-card fade-in">
-                    <div class="player-rank">TOP 6</div>
-                    <div class="player-info">
-                        <div class="player-avatar">
-                            <i class="fas fa-meteor"></i>
-                        </div>
-                        <div>
-                            <h3 class="player-name">Scaredd</h3>
-                            <div class="player-title">Метеоритный гений</div>
-                        </div>
-                    </div>
-                    <div class="threshold-badges">
-                        <div class="threshold-badge empty">Не обладает порогами</div>
-                    </div>
-                    <p class="player-description">Гений тактики и стратегии. Не нуждается в развитии порогов, так как его интеллект позволяет побеждать любого противника.</p>
-                </div>
-
-                <!-- Игрок 7 -->
-                <div class="player-card fade-in">
-                    <div class="player-rank">TOP 7</div>
-                    <div class="player-info">
-                        <div class="player-avatar">
-                            <i class="fas fa-staff-snake"></i>
-                        </div>
-                        <div>
-                            <h3 class="player-name">Shiokaze</h3>
-                            <div class="player-title">White Snake</div>
-                        </div>
-                    </div>
-                    <div class="threshold-badges">
-                        <div class="threshold-badge empty">Не обладает порогами</div>
-                    </div>
-                    <p class="player-description">Белая змея, использующая уникальные техники, не вписывающиеся в систему порогов. Его стиль боя невозможно классифицировать.</p>
-                </div>
-
-                <!-- Игрок 8 -->
-                <div class="player-card fade-in">
-                    <div class="player-rank">TOP 8</div>
-                    <div class="player-info">
-                        <div class="player-avatar">
-                            <i class="fas fa-skull"></i>
-                        </div>
-                        <div>
-                            <h3 class="player-name">Niger Goku</h3>
-                            <div class="player-title">Темный лорд Африки</div>
-                        </div>
-                    </div>
-                    <div class="threshold-badges">
-                        <div class="threshold-badge empty">Не обладает порогами</div>
-                    </div>
-                    <p class="player-description">Темный властелин, черпающий силу из древних источников. Его способности выходят за рамки традиционной системы порогов.</p>
-                </div>
-
-                <!-- Игрок 9 -->
-                <div class="player-card fade-in">
-                    <div class="player-rank">TOP 9</div>
-                    <div class="player-info">
-                        <div class="player-avatar">
-                            <i class="fas fa-brain"></i>
-                        </div>
-                        <div>
-                            <h3 class="player-name">Vladglobal</h3>
-                            <div class="player-title">Fix Dodik</div>
-                        </div>
-                    </div>
-                    <div class="threshold-badges">
-                        <div class="threshold-badge">Отрицательный интеллект: 3 ур.</div>
-                    </div>
-                    <p class="player-description">Уникальный случай - обладает порогом отрицательного интеллекта. Его решения настолько нелогичны, что становятся гениальными.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Секция о Bobix Corporation -->
-        <section class="thresholds-info fade-in" id="about">
-            <h2>О BOBIX CORPORATION</h2>
-            <p>Bobix Corporation - это элитное сообщество, объединяющее сильнейших игроков Shindo Life. Мы не просто играем - мы развиваемся, совершенствуемся и создаем новые стандарты игрового мастерства.</p>
-            <p>Наша система порогов позволяет каждому игроку найти свой уникальный путь к силе. Одни становятся непревзойденными разрушителями, другие - неуязвимыми защитниками, третьи - невидимыми ассасинами.</p>
-            <p>Каждый топовый игрок корпорации представляет собой пример максимального развития в своей специализации. Их достижения вдохновляют новичков и задают новые цели для опытных игроков.</p>
-            <p>Присоединяйтесь к Bobix Corporation, чтобы найти свой путь и развить свой порог до невероятных высот!</p>
-        </section>
-    </main>
-
-    <!-- Футер -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-logo">BOBIX CORPORATION</div>
-            <div class="footer-links">
-                <a href="#home">Главная</a>
-                <a href="#thresholds">Пороги</a>
-                <a href="#top">Топ игроков</a>
-                <a href="#about">О нас</a>
-                <a href="#">Турниры</a>
-                <a href="#">Правила</a>
-                <a href="#">Контакты</a>
-            </div>
-            <div class="social-icons">
-                <a href="#"><i class="fab fa-discord"></i></a>
-                <a href="#"><i class="fab fa-youtube"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-twitch"></i></a>
-                <a href="#"><i class="fab fa-tiktok"></i></a>
-            </div>
-            <div class="copyright">
-                &copy; 2023 Bobix Corporation. Все права защищены.<br>
-                Система порогов является уникальной разработкой Bobix Corporation.
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // Плавная прокрутка
-        document.querySelectorAll('nav a, .btn').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                if (this.getAttribute('href').startsWith('#')) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    const targetElement = document.querySelector(targetId);
-                    
-                    if (targetElement) {
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 120,
-                            behavior: 'smooth'
-                        });
-                    }
-                }
-            });
-        });
-
-        // Активация пунктов меню при прокрутке
-        const sections = document.querySelectorAll('section');
-        const navLinks = document.querySelectorAll('nav a');
-
-        window.addEventListener('scroll', () => {
-            let current = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                const sectionHeight = section.clientHeight;
-                if (scrollY >= (sectionTop - 200)) {
-                    current = section.getAttribute('id');
-                }
-            });
-
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === `#${current}`) {
-                    link.classList.add('active');
-                }
-            });
-
-            // Изменение шапки при прокрутке
-            const header = document.querySelector('header');
-            if (window.scrollY > 50) {
-                header.style.padding = '0.8rem 0';
-                header.style.backgroundColor = 'rgba(0, 0, 0, 0.98)';
-            } else {
-                header.style.padding = '1.2rem 0';
-                header.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
-            }
-        });
-
-        // Анимация появления элементов при прокрутке
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in');
-                }
-            });
-        }, observerOptions);
-
-        // Наблюдаем за всеми элементами с анимацией
-        document.querySelectorAll('.fade-in').forEach(el => {
-            observer.observe(el);
-        });
-
-        // Эффект свечения для карточек при наведении
-        document.querySelectorAll('.player-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.boxShadow = '0 15px 35px rgba(255, 215, 0, 0.4)';
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5)';
-            });
-        });
-
-        // Динамическое изменение цвета фона у порогов
-        document.querySelectorAll('.threshold-badge').forEach(badge => {
-            if (!badge.classList.contains('empty')) {
-                badge.addEventListener('mouseenter', function() {
-                    this.style.backgroundColor = 'rgba(255, 215, 0, 0.3)';
-                    this.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.5)';
-                });
-                
-                badge.addEventListener('mouseleave', function() {
-                    this.style.backgroundColor = 'rgba(255, 215, 0, 0.1)';
-                    this.style.boxShadow = 'none';
-                });
-            }
-        });
-
-        // Эффект для кнопки
-        const btn = document.querySelector('.btn');
-        btn.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px) scale(1.05)';
-        });
-        
-        btn.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-
     <div class="grid-bg"></div>
     <header>
         <div class="header-container">
@@ -1074,7 +689,6 @@
     <script src="https://cdn.jsdelivr.net"></script>
     <script src="db.js"></script>
     <script>
-        
         async function checkAccess() {
             const { data: { user } } = await _supabase.auth.getUser();
             if (!user) { window.location.href = 'index.html'; return; }
