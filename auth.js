@@ -426,27 +426,35 @@ function setLoadingState(isLoading) {
  */
 async function logout() {
     try {
-        setLoadingState(true);
-        const { error } = await _supabase.auth.signOut();
-        
-        if (error) {
-            showError('Ошибка при выходе из системы');
-            setLoadingState(false);
-            return;
+        // Показываем состояние загрузки
+        const logoutBtn = document.querySelector('.logout-btn');
+        if (logoutBtn) {
+            logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Выход...';
+            logoutBtn.disabled = true;
         }
         
-        // Перенаправляем на главную страницу
-        window.location.href = 'index.html';
+        // Очищаем все данные аутентификации
+        await _supabase.auth.signOut();
+        
+        // Очищаем localStorage
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('sb-tstyjtgcisdelkkltyjo-auth-token');
+        
+        // Очищаем сессионные данные
+        sessionStorage.clear();
+        
+        // Перенаправляем на главную страницу с принудительным обновлением
+        setTimeout(() => {
+            window.location.href = 'index.html?logout=' + Date.now();
+        }, 500);
         
     } catch (error) {
-        showError('Ошибка при выходе из системы');
-        setLoadingState(false);
+        console.error('Ошибка при выходе:', error);
+        showNotification('Ошибка при выходе из системы. Попробуйте очистить кэш браузера.', 'error');
+        
+        // Все равно перенаправляем
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1000);
     }
-}
-
-// Экспортируем функции для использования в других файлах
-if (typeof window !== 'undefined') {
-    window.openAuthModal = openAuthModal;
-    window.closeAuthModal = closeAuthModal;
-    window.logout = logout;
 }
