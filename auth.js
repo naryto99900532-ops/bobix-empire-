@@ -79,6 +79,18 @@ function handleToggleAuth() {
         el.style.display = isSignUp ? 'block' : 'none';
     });
     
+    // Убираем required атрибуты при входе, добавляем при регистрации
+    const usernameInput = document.getElementById('username');
+    const confirmPassInput = document.getElementById('confirmPass');
+    
+    if (isSignUp) {
+        if (usernameInput) usernameInput.required = true;
+        if (confirmPassInput) confirmPassInput.required = true;
+    } else {
+        if (usernameInput) usernameInput.required = false;
+        if (confirmPassInput) confirmPassInput.required = false;
+    }
+    
     // Очищаем сообщения об ошибках
     clearError();
     
