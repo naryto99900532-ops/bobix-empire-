@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bobix Corporation - Личный Кабинет</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Russo+One&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css"> <!-- Твои стили из сообщения выше -->
+    <title>Bobix Corporation - Система Порогов</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com">
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="grid-bg"></div>
@@ -18,79 +18,107 @@
                 <div class="logo-text">BOBIX<span>CORP</span></div>
             </div>
             <nav>
-                <ul id="navMenu">
-                    <li><a href="#" class="active" onclick="loadSection('players', this)">Игроки</a></li>
-                    <li><a href="#" onclick="loadSection('top', this)">Топ Клана</a></li>
-                    <li><a href="#" id="adminBtn" style="display:none" onclick="loadSection('admin', this)">Admin Panel</a></li>
-                    <li><a href="#" id="ownerBtn" style="display:none" onclick="loadSection('owner', this)">Owner Panel</a></li>
-                    <li><a href="#" onclick="logout()" style="border-color: #ff4444; color: #ff4444;">Выйти</a></li>
+                <ul>
+                    <li><a href="#" class="active" onclick="loadSection('home')">Главная</a></li>
+                    <li><a href="#" onclick="loadSection('players')">Игроки</a></li>
+                    <li id="adminLi" style="display:none"><a href="#" onclick="loadSection('admin')">Админ Панель</a></li>
+                    <li id="ownerLi" style="display:none"><a href="#" onclick="loadSection('owner')">Owner Panel</a></li>
+                    <li><a href="#" onclick="handleLogout()" style="border-color: #ff4444; color: #ff4444;">Выход</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <div class="container">
-        <!-- Сюда подгружается контент -->
-        <section class="thresholds-info" id="mainContent">
-            <div class="hero">
-                <h1 id="welcomeTitle">ЗАГРУЗКА...</h1>
-                <p id="welcomeSub">Синхронизация с базой данных Bobix Corp</p>
+    <div class="container" id="mainContent">
+        <!-- СЕКЦИЯ ГЕРОЯ (ВОЗВРАЩЕНА) -->
+        <section class="hero">
+            <h1 id="userGreeting">BOBIX CORP</h1>
+            <p id="heroSubtitle">Добро пожаловать в элиту. Здесь управляются пороги и мощь корпорации.</p>
+            <a href="#info" class="btn" onclick="loadSection('players')">Смотреть игроков</a>
+        </section>
+
+        <!-- СЕКЦИЯ ИНФОРМАЦИИ И ПОРОГОВ (ВОЗВРАЩЕНА ПОЛНОСТЬЮ) -->
+        <section class="thresholds-info" id="info">
+            <h2>СИСТЕМА ПОРОГОВ</h2>
+            <p>Наша корпорация работает на основе четких уровней эффективности. Каждый порог открывает новые возможности для бойца.</p>
+            
+            <div class="threshold-types">
+                <div class="threshold-card">
+                    <span class="threshold-number">01</span>
+                    <h3>Базовый</h3>
+                    <p>Начальный уровень для новых рекрутов Bobix Corp. Доступ к общим операциям.</p>
+                </div>
+                <div class="threshold-card">
+                    <span class="threshold-number">02</span>
+                    <h3>Продвинутый</h3>
+                    <p>Требует подтвержденной активности. Увеличенные бонусы и доступ к спец-каналам.</p>
+                </div>
+                <div class="threshold-card">
+                    <span class="threshold-number">03</span>
+                    <h3>Элитный</h3>
+                    <p>Высший уровень мастерства. Прямое управление операциями и расширенные права.</p>
+                </div>
             </div>
         </section>
     </div>
 
-    <!-- Библиотеки -->
+    <!-- SDK & DB -->
     <script src="https://cdn.jsdelivr.net"></script>
     <script src="db.js"></script>
 
     <script>
-        // Проверка ролей при входе
+        // Сохраняем исходный HTML главной страницы для возврата к нему
+        const homeHTML = document.getElementById('mainContent').innerHTML;
+
         async function checkRole() {
             const { data: { user } } = await _supabase.auth.getUser();
             if (!user) { window.location.href = 'index.html'; return; }
 
-            // Выводим никнейм
-            const username = user.user_metadata.username || "БОЕЦ";
-            document.getElementById('welcomeTitle').innerText = username.toUpperCase();
+            // Меняем текст в Hero на никнейм юзера
+            const nick = user.user_metadata.username || "БОЕЦ";
+            document.getElementById('userGreeting').innerText = nick.toUpperCase();
 
+            // Проверка прав
             let { data: profile } = await _supabase.from('profiles').select('role').eq('id', user.id).single();
-
-            if (profile?.role === 'admin' || profile?.role === 'owner') {
-                document.getElementById('adminBtn').style.display = 'block';
-            }
-            if (profile?.role === 'owner') {
-                document.getElementById('ownerBtn').style.display = 'block';
+            if (profile) {
+                if (profile.role === 'admin' || profile.role === 'owner') document.getElementById('adminLi').style.display = 'block';
+                if (profile.role === 'owner') document.getElementById('ownerLi').style.display = 'block';
             }
         }
 
-        // Переключение разделов
-        function loadSection(name, element) {
-            // Убираем активный класс у всех ссылок
-            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-            if(element) element.classList.add('active');
-
-            const content = document.getElementById('mainContent');
+        function loadSection(name) {
+            const container = document.getElementById('mainContent');
             
-            const layouts = {
-                players: `<h2><i class="fas fa-users"></i> Clan Players</h2><p>Список бойцов корпорации загружается...</p>`,
-                top: `<h2><i class="fas fa-trophy"></i> Top Of Clan</h2><p>Лучшие по порогам за неделю.</p>`,
-                admin: `<h2><i class="fas fa-tools"></i> Admin Panel</h2><p>Редактирование данных игроков.</p>`,
-                owner: `<h2><i class="fas fa-crown"></i> Owner Panel</h2><p>Управление правами доступа.</p>`
-            };
+            // Визуальный актив на кнопках
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            if(event.target.tagName === 'A') event.target.classList.add('active');
 
-            content.style.opacity = 0;
-            setTimeout(() => {
-                content.innerHTML = layouts[name] || layouts.players;
-                content.style.opacity = 1;
-            }, 200);
+            if (name === 'home') {
+                container.innerHTML = homeHTML;
+                checkRole(); // Перезапуск приветствия
+            } else if (name === 'players') {
+                container.innerHTML = `
+                    <section class="thresholds-info">
+                        <h2>СПИСОК ИГРОКОВ</h2>
+                        <div class="threshold-types">
+                            <div class="threshold-card"><h3>Загрузка данных...</h3></div>
+                        </div>
+                    </section>`;
+            } else if (name === 'admin') {
+                container.innerHTML = `
+                    <section class="thresholds-info" style="border-color: #ffcc00">
+                        <h2>ADMIN PANEL</h2>
+                        <p>Управление участниками и их порогами.</p>
+                    </section>`;
+            }
         }
 
-        async function logout() {
+        async function handleLogout() {
             await _supabase.auth.signOut();
             window.location.href = 'index.html';
         }
 
-        checkRole();
+        window.onload = checkRole;
     </script>
 </body>
 </html>
