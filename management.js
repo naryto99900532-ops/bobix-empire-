@@ -112,18 +112,38 @@ async function createUserProfile() {
             .from('profiles')
             .upsert({
                 id: currentUser.id,
-                username: currentUser.user_metadata?.username || currentUser.email,
+                username: currentUser.user_metadata?.username || currentUser.email?.split('@')[0] || 'user',
+                email: currentUser.email,
                 role: 'user',
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
+            }, {
+                onConflict: 'id',
+                ignoreDuplicates: false
             });
         
         if (error) {
             console.error('Ошибка создания профиля:', error);
+            // Если ошибка из-за отсутствия колонки, создаем упрощенный профиль
+            if (error.message.includes('created_at') || error.message.includes('column')) {
+                const { error: simpleError } = await _supabase
+                    .from('profiles')
+                    .upsert({
+                        id: currentUser.id,
+                        username: currentUser.user_metadata?.username || currentUser.email?.split('@')[0] || 'user',
+                        role: 'user'
+                    });
+                
+                if (simpleError) {
+                    console.error('Простая вставка тоже не удалась:', simpleError);
+                }
+            }
+        } else {
+            console.log('Профиль успешно создан/обновлен');
         }
         
     } catch (error) {
-        console.error('Ошибка создания профиля:', error);
+        console.error('Критическая ошибка создания профиля:', error);
     }
 }
 
