@@ -821,3 +821,439 @@ nav a:hover, nav a.active {
         justify-content: center;
     }
 }
+
+/* Добавляем в конец файла style.css */
+
+/* Стили для панелей админа и владельца */
+.admin-controls-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(17, 17, 17, 0.9);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.admin-controls-header h3 {
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+}
+
+.admin-controls-header p {
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.admin-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(255, 215, 0, 0.05);
+    border-radius: 5px;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.feature-item i {
+    color: var(--accent);
+}
+
+.admin-stats {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(17, 17, 17, 0.9);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.stat-card {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 10px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(45deg, var(--accent), var(--accent-glow));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #000;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.clickable:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+}
+
+/* Стили для модальных окон */
+.modal-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.2);
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.tab:hover {
+    color: var(--accent);
+}
+
+.tab.active {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.users-list-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 1rem;
+}
+
+.user-item-modal {
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-item-modal:hover {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+.user-item-modal.selected {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: var(--accent);
+    transform: translateX(-10px);
+}
+
+.user-item-modal .user-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(45deg, var(--accent), var(--accent-glow));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: bold;
+}
+
+.user-item-modal .user-info h4 {
+    color: var(--accent);
+    margin-bottom: 3px;
+}
+
+.user-item-modal .user-info p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.make-admin-btn {
+    margin-left: auto;
+    padding: 6px 12px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: var(--accent);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: none;
+}
+
+.user-item-modal.selected .make-admin-btn {
+    display: block;
+}
+
+.make-admin-btn:hover {
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.warning-message {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.warning-message i {
+    font-size: 3rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+.warning-details {
+    text-align: left;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.warning-details ul {
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.warning-details li {
+    margin-bottom: 5px;
+    color: var(--text-secondary);
+}
+
+/* Стили для списка администраторов */
+.administrators-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.administrator-card {
+    background: rgba(17, 17, 17, 0.9);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    transition: all 0.3s;
+}
+
+.administrator-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-5px);
+}
+
+.admin-avatar {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, var(--accent), var(--accent-glow));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #000;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.admin-info {
+    flex: 1;
+}
+
+.admin-info h4 {
+    color: var(--accent);
+    margin-bottom: 5px;
+    font-size: 1.2rem;
+}
+
+.admin-role {
+    display: inline-block;
+    background: rgba(255, 215, 0, 0.1);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+}
+
+.admin-details {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.admin-details p {
+    margin: 3px 0;
+}
+
+.admin-actions-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 10px;
+}
+
+/* Детали игрока */
+.player-details {
+    padding: 1rem;
+}
+
+.player-details-item {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.player-details-item:last-child {
+    border-bottom: none;
+}
+
+.player-details-item label {
+    display: block;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.player-details-item .value {
+    color: var(--text);
+    font-size: 1.1rem;
+}
+
+.player-details-item .value.discord {
+    color: #7289da;
+    font-family: monospace;
+}
+
+.player-details-item .value.roblox {
+    color: #ff4500;
+}
+
+/* Стили для Clan Players с деталями */
+.player-card-with-details {
+    position: relative;
+    cursor: pointer;
+}
+
+.player-card-with-details .player-details-hover {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid var(--accent);
+    border-radius: 0 0 10px 10px;
+    padding: 1rem;
+    z-index: 10;
+    display: none;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.player-card-with-details:hover .player-details-hover {
+    display: block;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.detail-label {
+    color: var(--text-secondary);
+}
+
+.detail-value {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.detail-value.discord {
+    color: #7289da;
+}
+
+.detail-value.roblox {
+    color: #ff4500;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.selected .make-admin-btn {
+    animation: slideInRight 0.3s ease;
+}
