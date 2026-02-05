@@ -1,3 +1,29 @@
+
+.dashboard-body {
+    padding-top: 120px;
+}
+
+#mainContent {
+    transition: opacity 0.3s ease;
+    min-height: 400px;
+}
+
+.logout-link {
+    border-color: rgba(255, 0, 0, 0.5) !important;
+    color: #ff4444 !important;
+}
+
+.logout-link:hover {
+    background: rgba(255, 0, 0, 0.2) !important;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.4) !important;
+}
+
+/* Стили для активных ссылок в навигации */
+nav a.active {
+    background-color: var(--accent);
+    color: #000 !important;
+}
+
 body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
 header { padding: 20px; border-bottom: 2px solid #ffcc00; }
 nav { display: flex; justify-content: space-between; align-items: center; }
