@@ -56,8 +56,28 @@
                     <i class="fas fa-sign-out-alt"></i> Выйти
                 </a>
             </nav>
-        </aside>
 
+            <nav class="sidebar-nav">
+    <a href="#clan-players" class="nav-item active" data-section="clan-players">
+        <i class="fas fa-users"></i> Clan Players
+    </a>
+    <a href="#top-clan" class="nav-item" data-section="top-clan">
+        <i class="fas fa-trophy"></i> Top Of Clan
+    </a>
+    <a href="#admin-panel" class="nav-item admin-only" data-section="admin-panel" style="display: none;">
+        <i class="fas fa-user-shield"></i> Admin Panel
+    </a>
+    <a href="#owner-panel" class="nav-item owner-only" data-section="owner-panel" style="display: none;">
+        <i class="fas fa-crown"></i> Owner Panel
+    </a>
+    <a href="#administrators" class="nav-item admin-only" data-section="administrators" style="display: none;">
+        <i class="fas fa-user-tie"></i> Administrators
+    </a>
+    <a href="#" class="nav-item logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Выйти
+    </a>
+</nav>
+        </aside>
         <!-- Основное содержимое -->
         <main class="main-content">
             <!-- Секция Clan Players -->
@@ -122,78 +142,184 @@
             </section>
 
             <!-- Секция Admin Panel -->
-            <section id="admin-panel" class="content-section">
-                <div class="section-header">
-                    <h2><i class="fas fa-user-shield"></i> Панель администратора</h2>
-                    <p>Управление контентом и настройками</p>
-                </div>
-                
-                <div class="admin-content">
-                    <div class="thresholds-info">
-                        <h3>Статистика системы</h3>
-                        <div class="threshold-types">
-                            <div class="threshold-card">
-                                <h3><i class="fas fa-users"></i> Всего игроков</h3>
-                                <p id="totalPlayers">0</p>
-                            </div>
-                            <div class="threshold-card">
-                                <h3><i class="fas fa-user-plus"></i> Новые игроки (30 дней)</h3>
-                                <p id="newPlayers">0</p>
-                            </div>
-                            <div class="threshold-card">
-                                <h3><i class="fas fa-chart-line"></i> Активность</h3>
-                                <p id="systemActivity">Низкая</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="admin-controls" style="margin-top: 2rem;">
-                        <button class="admin-btn primary" onclick="refreshPlayersData()">
-                            <i class="fas fa-sync-alt"></i> Обновить все данные
-                        </button>
-                        <button class="admin-btn" onclick="exportPlayersData()">
-                            <i class="fas fa-download"></i> Экспорт данных
-                        </button>
-                        <button class="admin-btn danger" onclick="clearAllPlayers()">
-                            <i class="fas fa-trash-alt"></i> Очистить всех игроков
-                        </button>
-                    </div>
-                </div>
-            </section>
+            <!-- После существующих секций добавляем: -->
 
-            <!-- Секция Owner Panel -->
-            <section id="owner-panel" class="content-section">
-                <div class="section-header">
-                    <h2><i class="fas fa-crown"></i> Панель владельца</h2>
-                    <p>Управление правами доступа администраторов</p>
+<!-- Секция Admin Panel -->
+<section id="admin-panel" class="content-section">
+    <div class="section-header">
+        <h2><i class="fas fa-user-shield"></i> Панель администратора</h2>
+        <p>Управление игроками клана</p>
+    </div>
+    
+    <div class="admin-content">
+        <div class="admin-controls-header">
+            <h3><i class="fas fa-user-plus"></i> Управление игроками</h3>
+            <div class="admin-actions">
+                <button class="admin-btn primary" onclick="openAddPlayerModal()">
+                    <i class="fas fa-plus-circle"></i> Добавить нового игрока
+                </button>
+                <button class="admin-btn" onclick="refreshPlayersData()">
+                    <i class="fas fa-sync-alt"></i> Обновить список
+                </button>
+            </div>
+        </div>
+        
+        <div class="thresholds-info">
+            <h4><i class="fas fa-users"></i> Быстрые действия</h4>
+            <div class="threshold-types">
+                <div class="threshold-card clickable" onclick="openAddPlayerModal()">
+                    <div class="threshold-number"><i class="fas fa-user-plus"></i></div>
+                    <h3>Добавить игрока</h3>
+                    <p>Добавить нового игрока в клан</p>
                 </div>
                 
-                <div class="admin-content">
-                    <div class="thresholds-info">
-                        <h3><i class="fas fa-user-cog"></i> Управление правами пользователей</h3>
-                        <p>Назначайте роли администраторов и управляйте доступом к системе.</p>
-                        
-                        <div class="user-list" id="usersList">
-                            <div class="loading">
-                                <i class="fas fa-spinner fa-spin"></i>
-                                <p>Загрузка списка пользователей...</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="thresholds-info" style="margin-top: 2rem;">
-                        <h3><i class="fas fa-shield-alt"></i> Настройки безопасности</h3>
-                        <div class="admin-controls">
-                            <button class="admin-btn primary" onclick="loadAllUsers()">
-                                <i class="fas fa-sync-alt"></i> Обновить список пользователей
-                            </button>
-                            <button class="admin-btn" onclick="showAuditLog()">
-                                <i class="fas fa-history"></i> Показать журнал действий
-                            </button>
-                        </div>
+                <div class="threshold-card clickable" onclick="loadPlayers()">
+                    <div class="threshold-number"><i class="fas fa-edit"></i></div>
+                    <h3>Редактировать</h3>
+                    <p>Редактировать существующих игроков</p>
+                </div>
+                
+                <div class="threshold-card clickable" onclick="openBulkEditModal()">
+                    <div class="threshold-number"><i class="fas fa-cogs"></i></div>
+                    <h3>Массовое редактирование</h3>
+                    <p>Редактировать нескольких игроков сразу</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="admin-stats">
+            <h4><i class="fas fa-chart-bar"></i> Статистика</h4>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalPlayersCount">0</div>
+                        <div class="stat-label">Всего игроков</div>
                     </div>
                 </div>
-            </section>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-crown"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="activePlayersCount">0</div>
+                        <div class="stat-label">Активные игроки</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-star"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="newPlayersWeek">0</div>
+                        <div class="stat-label">Новые за неделю</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Секция Owner Panel -->
+<section id="owner-panel" class="content-section">
+    <div class="section-header">
+        <h2><i class="fas fa-crown"></i> Панель владельца</h2>
+        <p>Управление администраторами и системой</p>
+    </div>
+    
+    <div class="admin-content">
+        <div class="admin-controls-header">
+            <h3><i class="fas fa-user-tie"></i> Управление администраторами</h3>
+            <div class="admin-actions">
+                <button class="admin-btn primary" onclick="openAddAdminModal()">
+                    <i class="fas fa-user-plus"></i> Добавить администратора
+                </button>
+                <button class="admin-btn" onclick="loadAllUsers()">
+                    <i class="fas fa-sync-alt"></i> Обновить список
+                </button>
+            </div>
+        </div>
+        
+        <div class="thresholds-info">
+            <h4><i class="fas fa-shield-alt"></i> Управление правами</h4>
+            <p>Владелец имеет полный контроль над системой, включая назначение администраторов и управление их правами.</p>
+            
+            <div class="admin-features">
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Назначать администраторов</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Управлять правами доступа</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Редактировать любых игроков</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Просматривать логи действий</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="admin-stats">
+            <h4><i class="fas fa-chart-pie"></i> Статистика системы</h4>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-user-tie"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalAdminsCount">0</div>
+                        <div class="stat-label">Администраторов</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-user"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalUsersCount">0</div>
+                        <div class="stat-label">Всего пользователей</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-history"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="systemUptime">100%</div>
+                        <div class="stat-label">Стабильность системы</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Секция Administrators -->
+<section id="administrators" class="content-section">
+    <div class="section-header">
+        <h2><i class="fas fa-user-tie"></i> Администраторы</h2>
+        <p>Список администраторов системы Bobix Corporation</p>
+    </div>
+    
+    <div class="admin-content">
+        <div class="admin-controls-header">
+            <div>
+                <h3><i class="fas fa-users-cog"></i> Управление администраторами</h3>
+                <p>Только владелец может добавлять и удалять администраторов</p>
+            </div>
+            <div class="admin-actions">
+                <button class="admin-btn primary owner-only" onclick="openAddAdminModal()" style="display: none;">
+                    <i class="fas fa-user-plus"></i> Добавить администратора
+                </button>
+                <button class="admin-btn" onclick="loadAdministrators()">
+                    <i class="fas fa-sync-alt"></i> Обновить список
+                </button>
+            </div>
+        </div>
+        
+        <div class="administrators-list" id="administratorsList">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Загрузка списка администраторов...</p>
+            </div>
+        </div>
+    </div>
+</section>
         </main>
     </div>
 
@@ -252,6 +378,151 @@
             </form>
         </div>
     </div>
+
+    <!-- После существующих модальных окон добавляем: -->
+
+<!-- Модальное окно добавления игрока -->
+<div id="addPlayerModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeAddPlayerModal()">&times;</span>
+        <h2><i class="fas fa-user-plus"></i> Добавить нового игрока</h2>
+        <form id="addPlayerForm">
+            <div class="form-group">
+                <label for="playerPseudonym"><i class="fas fa-user-secret"></i> Псевдоним игрока</label>
+                <input type="text" id="playerPseudonym" class="edit-input" placeholder="Введите псевдоним игрока" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="playerRoblox"><i class="fas fa-gamepad"></i> Roblox никнейм</label>
+                <input type="text" id="playerRoblox" class="edit-input" placeholder="Введите Roblox никнейм" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="playerDiscord"><i class="fab fa-discord"></i> Discord</label>
+                <input type="text" id="playerDiscord" class="edit-input" placeholder="Введите Discord (username#0000)" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="playerScore"><i class="fas fa-star"></i> Счет</label>
+                <input type="number" id="playerScore" class="edit-input" placeholder="Введите начальный счет" value="0" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="playerDescription"><i class="fas fa-file-alt"></i> Описание</label>
+                <textarea id="playerDescription" class="edit-input" placeholder="Введите описание игрока" rows="3"></textarea>
+            </div>
+            
+            <div class="admin-controls">
+                <button type="submit" class="admin-btn primary">
+                    <i class="fas fa-save"></i> Добавить игрока
+                </button>
+                <button type="button" class="admin-btn" onclick="closeAddPlayerModal()">
+                    <i class="fas fa-times"></i> Отмена
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно добавления администратора -->
+<div id="addAdminModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeAddAdminModal()">&times;</span>
+        <h2><i class="fas fa-user-tie"></i> Добавить администратора</h2>
+        
+        <div class="modal-tabs">
+            <div class="tab active" data-tab="users">Выбрать из пользователей</div>
+            <div class="tab" data-tab="new">Новый администратор</div>
+        </div>
+        
+        <div class="tab-content active" id="usersTab">
+            <div class="form-group">
+                <label><i class="fas fa-search"></i> Поиск пользователей</label>
+                <input type="text" id="searchUsers" class="edit-input" placeholder="Поиск по имени или email" onkeyup="filterUsers()">
+            </div>
+            
+            <div class="users-list-container">
+                <div class="users-list" id="usersListModal">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Загрузка пользователей...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="newTab">
+            <form id="newAdminForm">
+                <div class="form-group">
+                    <label for="newAdminUsername"><i class="fas fa-user"></i> Имя пользователя</label>
+                    <input type="text" id="newAdminUsername" class="edit-input" placeholder="Введите имя пользователя" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newAdminEmail"><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="newAdminEmail" class="edit-input" placeholder="Введите email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newAdminDiscord"><i class="fab fa-discord"></i> Discord</label>
+                    <input type="text" id="newAdminDiscord" class="edit-input" placeholder="Введите Discord">
+                </div>
+                
+                <div class="admin-controls">
+                    <button type="submit" class="admin-btn primary">
+                        <i class="fas fa-plus-circle"></i> Создать администратора
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения назначения администратора -->
+<div id="confirmAdminModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeConfirmAdminModal()">&times;</span>
+        <h2><i class="fas fa-exclamation-triangle"></i> Подтверждение</h2>
+        
+        <div class="warning-message">
+            <i class="fas fa-shield-alt"></i>
+            <h3>Назначение администратора</h3>
+            <p id="confirmAdminText">Вы собираетесь назначить пользователя администратором.</p>
+            
+            <div class="warning-details">
+                <p><strong>Внимание! Администратор получит следующие права:</strong></p>
+                <ul>
+                    <li>Добавление и редактирование игроков</li>
+                    <li>Управление списком Clan Players</li>
+                    <li>Редактирование Top Of Clan</li>
+                    <li>Доступ к административной панели</li>
+                </ul>
+                <p>Убедитесь, что доверяете этому пользователю.</p>
+            </div>
+        </div>
+        
+        <div class="admin-controls">
+            <button class="admin-btn danger" onclick="confirmMakeAdmin()">
+                <i class="fas fa-user-shield"></i> Назначить администратором
+            </button>
+            <button class="admin-btn" onclick="closeConfirmAdminModal()">
+                <i class="fas fa-times"></i> Отмена
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно деталей игрока -->
+<div id="playerDetailsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closePlayerDetailsModal()">&times;</span>
+        <h2><i class="fas fa-user"></i> Детали игрока</h2>
+        
+        <div class="player-details" id="playerDetailsContent">
+            <!-- Детали будут загружены динамически -->
+        </div>
+    </div>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="db.js"></script>
