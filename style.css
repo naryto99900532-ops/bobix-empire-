@@ -1,44 +1,430 @@
-
-.dashboard-body {
-    padding-top: 120px;
+/* --- ОСНОВНЫЕ НАСТРОЙКИ --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-#mainContent {
-    transition: opacity 0.3s ease;
-    min-height: 400px;
+:root {
+    --primary: #000000;
+    --secondary: #0a0a0a;
+    --accent: #ffd700;
+    --accent-dark: #b8860b;
+    --accent-glow: #ffed4a;
+    --text: #ffffff;
+    --text-secondary: #cccccc;
+    --card-bg: #111111;
+    --border: #333333;
 }
 
-.logout-link {
-    border-color: rgba(255, 0, 0, 0.5) !important;
-    color: #ff4444 !important;
+body {
+    background-color: var(--primary);
+    color: var(--text);
+    font-family: 'Orbitron', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 20%);
 }
 
-.logout-link:hover {
-    background: rgba(255, 0, 0, 0.2) !important;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.4) !important;
+/* Сетка на фоне */
+.grid-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255, 215, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 215, 0, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: -1;
 }
 
-/* Стили для активных ссылок в навигации */
-nav a.active {
+/* --- ШАПКА (HEADER) --- */
+header {
+    background-color: rgba(0, 0, 0, 0.95);
+    padding: 1rem 0;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 3px solid var(--accent);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.2);
+}
+
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+}
+
+.logo-icon {
+    color: var(--accent);
+    font-size: 2.5rem;
+    filter: drop-shadow(0 0 8px var(--accent));
+}
+
+.logo-text {
+    font-family: 'Russo One', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 2px;
+    background: linear-gradient(to right, var(--accent), var(--accent-glow));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.logo-text span { color: #fff; }
+
+/* Навигация */
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 1.2rem;
+}
+
+nav a {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.5rem 1.2rem;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 215, 0, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    text-transform: uppercase;
+}
+
+nav a:hover, nav a.active {
     background-color: var(--accent);
     color: #000 !important;
+    box-shadow: 0 0 15px var(--accent);
 }
 
-body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
-header { padding: 20px; border-bottom: 2px solid #ffcc00; }
-nav { display: flex; justify-content: space-between; align-items: center; }
-.btn-yellow { background: #ffcc00; color: #000; border: none; padding: 10px 25px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-.btn-yellow:hover { background: #e6b800; }
+/* --- КОНТЕНТ --- */
+.container {
+    max-width: 1200px;
+    margin: 120px auto 40px;
+    padding: 0 20px;
+}
 
-/* Модалка */
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
-.modal-content { background: #1a1a1a; padding: 40px; border: 2px solid #ffcc00; width: 320px; text-align: center; }
-input { width: 100%; padding: 12px; margin: 10px 0; background: #333; border: 1px solid #ffcc00; color: #fff; box-sizing: border-box; }
-#toggleAuth { font-size: 12px; color: #ffcc00; cursor: pointer; text-decoration: underline; margin-top: 15px; display: block; }
+.thresholds-info {
+    background-color: rgba(17, 17, 17, 0.9);
+    border-radius: 15px;
+    padding: 2.5rem;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+    min-height: 500px;
+    transition: opacity 0.3s ease;
+}
 
-/* Dashboard Layout */
-.dashboard-container { display: flex; height: 100vh; }
-.sidebar { width: 250px; background: #111; border-right: 2px solid #ffcc00; padding: 20px; }
-.sidebar button { width: 100%; background: none; border: 1px solid #ffcc00; color: #ffcc00; padding: 15px; margin-bottom: 10px; cursor: pointer; text-align: left; }
-.sidebar button:hover { background: #ffcc00; color: #000; }
-.content-area { flex: 1; padding: 40px; }
+.hero {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    margin-bottom: 1rem;
+}
+
+/* Карточки (для списка игроков) */
+.threshold-types {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.threshold-card {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.threshold-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-5px);
+}
+
+/* --- МОДАЛКА (ДЛЯ ВХОДА) --- */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background: #111;
+    padding: 40px;
+    border: 2px solid var(--accent);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.2);
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    background: #222;
+    border: 1px solid var(--border);
+    color: #fff;
+    font-family: 'Orbitron';
+}
+
+input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.btn-yellow {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 12px 30px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    text-transform: uppercase;
+}
+/* --- ОСНОВНЫЕ НАСТРОЙКИ --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #000000;
+    --secondary: #0a0a0a;
+    --accent: #ffd700;
+    --accent-dark: #b8860b;
+    --accent-glow: #ffed4a;
+    --text: #ffffff;
+    --text-secondary: #cccccc;
+    --card-bg: #111111;
+    --border: #333333;
+}
+
+body {
+    background-color: var(--primary);
+    color: var(--text);
+    font-family: 'Orbitron', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 20%);
+}
+
+/* Сетка на фоне */
+.grid-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255, 215, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 215, 0, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: -1;
+}
+
+/* --- ШАПКА (HEADER) --- */
+header {
+    background-color: rgba(0, 0, 0, 0.95);
+    padding: 1rem 0;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 3px solid var(--accent);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.2);
+}
+
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+}
+
+.logo-icon {
+    color: var(--accent);
+    font-size: 2.5rem;
+    filter: drop-shadow(0 0 8px var(--accent));
+}
+
+.logo-text {
+    font-family: 'Russo One', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 2px;
+    background: linear-gradient(to right, var(--accent), var(--accent-glow));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.logo-text span { color: #fff; }
+
+/* Навигация */
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 1.2rem;
+}
+
+nav a {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.5rem 1.2rem;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 215, 0, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    text-transform: uppercase;
+}
+
+nav a:hover, nav a.active {
+    background-color: var(--accent);
+    color: #000 !important;
+    box-shadow: 0 0 15px var(--accent);
+}
+
+/* --- КОНТЕНТ --- */
+.container {
+    max-width: 1200px;
+    margin: 120px auto 40px;
+    padding: 0 20px;
+}
+
+.thresholds-info {
+    background-color: rgba(17, 17, 17, 0.9);
+    border-radius: 15px;
+    padding: 2.5rem;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+    min-height: 500px;
+    transition: opacity 0.3s ease;
+}
+
+.hero {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    margin-bottom: 1rem;
+}
+
+/* Карточки (для списка игроков) */
+.threshold-types {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.threshold-card {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.threshold-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-5px);
+}
+
+/* --- МОДАЛКА (ДЛЯ ВХОДА) --- */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background: #111;
+    padding: 40px;
+    border: 2px solid var(--accent);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.2);
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    background: #222;
+    border: 1px solid var(--border);
+    color: #fff;
+    font-family: 'Orbitron';
+}
+
+input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.btn-yellow {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 12px 30px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    text-transform: uppercase;
+}
