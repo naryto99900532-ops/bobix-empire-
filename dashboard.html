@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bobix Corp - Dashboard</title>
+    <title>Bobix Corporation - Личный Кабинет</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css"> <!-- Твои стили из сообщения выше -->
 </head>
-<body class="dashboard-body">
+<body>
     <div class="grid-bg"></div>
-    
+
     <header>
         <div class="header-container">
             <div class="logo" onclick="location.href='index.html'">
@@ -18,34 +18,40 @@
                 <div class="logo-text">BOBIX<span>CORP</span></div>
             </div>
             <nav>
-                <ul id="mainNav">
-                    <li><a href="#" class="active" onclick="loadSection('players')">Игроки</a></li>
-                    <li><a href="#" id="adminBtn" style="display:none" onclick="loadSection('admin')">Админ Панель</a></li>
-                    <li><a href="#" id="ownerBtn" style="display:none" onclick="loadSection('owner')">Owner Panel</a></li>
-                    <li><a href="#" onclick="logout()" class="logout-link"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
+                <ul id="navMenu">
+                    <li><a href="#" class="active" onclick="loadSection('players', this)">Игроки</a></li>
+                    <li><a href="#" onclick="loadSection('top', this)">Топ Клана</a></li>
+                    <li><a href="#" id="adminBtn" style="display:none" onclick="loadSection('admin', this)">Admin Panel</a></li>
+                    <li><a href="#" id="ownerBtn" style="display:none" onclick="loadSection('owner', this)">Owner Panel</a></li>
+                    <li><a href="#" onclick="logout()" style="border-color: #ff4444; color: #ff4444;">Выйти</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
     <div class="container">
+        <!-- Сюда подгружается контент -->
         <section class="thresholds-info" id="mainContent">
             <div class="hero">
-                <h1 id="welcomeText">Загрузка...</h1>
-                <p>Добро пожаловать в систему управления кланом. Выберите раздел в меню выше.</p>
+                <h1 id="welcomeTitle">ЗАГРУЗКА...</h1>
+                <p id="welcomeSub">Синхронизация с базой данных Bobix Corp</p>
             </div>
         </section>
     </div>
 
-    <!-- Supabase & Logic -->
+    <!-- Библиотеки -->
     <script src="https://cdn.jsdelivr.net"></script>
     <script src="db.js"></script>
+
     <script>
+        // Проверка ролей при входе
         async function checkRole() {
             const { data: { user } } = await _supabase.auth.getUser();
             if (!user) { window.location.href = 'index.html'; return; }
 
-            document.getElementById('welcomeText').innerText = `ПРИВЕТ, ${user.user_metadata.username || 'БОЕЦ'}`;
+            // Выводим никнейм
+            const username = user.user_metadata.username || "БОЕЦ";
+            document.getElementById('welcomeTitle').innerText = username.toUpperCase();
 
             let { data: profile } = await _supabase.from('profiles').select('role').eq('id', user.id).single();
 
@@ -57,26 +63,26 @@
             }
         }
 
-        function loadSection(name) {
+        // Переключение разделов
+        function loadSection(name, element) {
+            // Убираем активный класс у всех ссылок
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            if(element) element.classList.add('active');
+
             const content = document.getElementById('mainContent');
-            // Анимация затухания
-            content.style.opacity = 0;
             
+            const layouts = {
+                players: `<h2><i class="fas fa-users"></i> Clan Players</h2><p>Список бойцов корпорации загружается...</p>`,
+                top: `<h2><i class="fas fa-trophy"></i> Top Of Clan</h2><p>Лучшие по порогам за неделю.</p>`,
+                admin: `<h2><i class="fas fa-tools"></i> Admin Panel</h2><p>Редактирование данных игроков.</p>`,
+                owner: `<h2><i class="fas fa-crown"></i> Owner Panel</h2><p>Управление правами доступа.</p>`
+            };
+
+            content.style.opacity = 0;
             setTimeout(() => {
-                if(name === 'players') {
-                    content.innerHTML = `
-                        <h2><i class="fas fa-users"></i> Clan Players</h2>
-                        <div class="threshold-types">
-                            <div class="threshold-card"><h3>Загрузка списка...</h3></div>
-                        </div>`;
-                }
-                if(name === 'admin') {
-                    content.innerHTML = `
-                        <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
-                        <p>Управление участниками и модерация данных.</p>`;
-                }
+                content.innerHTML = layouts[name] || layouts.players;
                 content.style.opacity = 1;
-            }, 300);
+            }, 200);
         }
 
         async function logout() {
