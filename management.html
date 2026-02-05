@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bobix Corporation - Панель управления</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="grid-bg"></div>
+    
+    <header>
+        <div class="header-container">
+            <div class="logo" onclick="window.location.href='index.html'">
+                <i class="fas fa-crown logo-icon"></i>
+                <div class="logo-text">BOBIX <span>CORPORATION</span></div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> На главную</a></li>
+                    <li><button onclick="logout()" class="nav-login-btn logout-btn"><i class="fas fa-sign-out-alt"></i> Выйти</button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="management-container">
+        <!-- Боковая панель навигации -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">BC</div>
+                    <div>
+                        <div class="user-name" id="userName">Загрузка...</div>
+                        <div class="user-role" id="userRole">user</div>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#clan-players" class="nav-item active" data-section="clan-players">
+                    <i class="fas fa-users"></i> Clan Players
+                </a>
+                <a href="#top-clan" class="nav-item" data-section="top-clan">
+                    <i class="fas fa-trophy"></i> Top Of Clan
+                </a>
+                <a href="#admin-panel" class="nav-item admin-only" data-section="admin-panel" style="display: none;">
+                    <i class="fas fa-user-shield"></i> Admin Panel
+                </a>
+                <a href="#owner-panel" class="nav-item owner-only" data-section="owner-panel" style="display: none;">
+                    <i class="fas fa-crown"></i> Owner Panel
+                </a>
+                <a href="#" class="nav-item logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Основное содержимое -->
+        <main class="main-content">
+            <!-- Секция Clan Players -->
+            <section id="clan-players" class="content-section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-users"></i> Управление игроками клана</h2>
+                    <p>Добавляйте, редактируйте и удаляйте игроков клана</p>
+                </div>
+                
+                <!-- Форма добавления нового игрока (только для админов/владельцев) -->
+                <div class="add-player-form admin-only" style="display: none;">
+                    <h3><i class="fas fa-plus-circle"></i> Добавить нового игрока</h3>
+                    <form id="addPlayerForm">
+                        <div class="form-row">
+                            <div>
+                                <input type="text" id="newPlayerName" class="edit-input" placeholder="Имя игрока" required>
+                            </div>
+                            <div>
+                                <input type="number" id="newPlayerScore" class="edit-input" placeholder="Счет (число)" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <textarea id="newPlayerDescription" class="edit-input" placeholder="Описание игрока" rows="3" required></textarea>
+                        </div>
+                        <div class="admin-controls">
+                            <button type="submit" class="admin-btn primary">
+                                <i class="fas fa-save"></i> Добавить игрока
+                            </button>
+                            <button type="button" class="admin-btn" onclick="clearAddForm()">
+                                <i class="fas fa-times"></i> Очистить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Список игроков -->
+                <div class="section-header">
+                    <h3><i class="fas fa-list"></i> Список игроков</h3>
+                </div>
+                
+                <div class="players-list" id="playersList">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Загрузка списка игроков...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Секция Top Of Clan -->
+            <section id="top-clan" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-trophy"></i> Топ игроков клана</h2>
+                    <p>Рейтинг лучших игроков Bobix Corporation</p>
+                </div>
+                
+                <div class="players-list" id="topPlayersList">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Загрузка топа игроков...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Секция Admin Panel -->
+            <section id="admin-panel" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-shield"></i> Панель администратора</h2>
+                    <p>Управление контентом и настройками</p>
+                </div>
+                
+                <div class="admin-content">
+                    <div class="thresholds-info">
+                        <h3>Статистика системы</h3>
+                        <div class="threshold-types">
+                            <div class="threshold-card">
+                                <h3><i class="fas fa-users"></i> Всего игроков</h3>
+                                <p id="totalPlayers">0</p>
+                            </div>
+                            <div class="threshold-card">
+                                <h3><i class="fas fa-user-plus"></i> Новые игроки (30 дней)</h3>
+                                <p id="newPlayers">0</p>
+                            </div>
+                            <div class="threshold-card">
+                                <h3><i class="fas fa-chart-line"></i> Активность</h3>
+                                <p id="systemActivity">Низкая</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-controls" style="margin-top: 2rem;">
+                        <button class="admin-btn primary" onclick="refreshPlayersData()">
+                            <i class="fas fa-sync-alt"></i> Обновить все данные
+                        </button>
+                        <button class="admin-btn" onclick="exportPlayersData()">
+                            <i class="fas fa-download"></i> Экспорт данных
+                        </button>
+                        <button class="admin-btn danger" onclick="clearAllPlayers()">
+                            <i class="fas fa-trash-alt"></i> Очистить всех игроков
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Секция Owner Panel -->
+            <section id="owner-panel" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-crown"></i> Панель владельца</h2>
+                    <p>Управление правами доступа администраторов</p>
+                </div>
+                
+                <div class="admin-content">
+                    <div class="thresholds-info">
+                        <h3><i class="fas fa-user-cog"></i> Управление правами пользователей</h3>
+                        <p>Назначайте роли администраторов и управляйте доступом к системе.</p>
+                        
+                        <div class="user-list" id="usersList">
+                            <div class="loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Загрузка списка пользователей...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="thresholds-info" style="margin-top: 2rem;">
+                        <h3><i class="fas fa-shield-alt"></i> Настройки безопасности</h3>
+                        <div class="admin-controls">
+                            <button class="admin-btn primary" onclick="loadAllUsers()">
+                                <i class="fas fa-sync-alt"></i> Обновить список пользователей
+                            </button>
+                            <button class="admin-btn" onclick="showAuditLog()">
+                                <i class="fas fa-history"></i> Показать журнал действий
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Модальное окно для редактирования игрока -->
+    <div id="editPlayerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            <h2>Редактирование игрока</h2>
+            <form id="editPlayerForm">
+                <input type="hidden" id="editPlayerId">
+                <div class="form-group">
+                    <input type="text" id="editPlayerName" class="edit-input" placeholder="Имя игрока" required>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="editPlayerScore" class="edit-input" placeholder="Счет" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="editPlayerDescription" class="edit-input" placeholder="Описание" rows="4" required></textarea>
+                </div>
+                <div class="admin-controls">
+                    <button type="submit" class="admin-btn primary">
+                        <i class="fas fa-save"></i> Сохранить изменения
+                    </button>
+                    <button type="button" class="admin-btn danger" id="deletePlayerBtn">
+                        <i class="fas fa-trash-alt"></i> Удалить игрока
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно для управления ролями -->
+    <div id="roleModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeRoleModal()">&times;</span>
+            <h2>Изменение роли пользователя</h2>
+            <form id="roleForm">
+                <input type="hidden" id="roleUserId">
+                <div class="form-group">
+                    <h3 id="roleUserName">Пользователь</h3>
+                    <p id="roleUserEmail">Email</p>
+                </div>
+                <div class="form-group">
+                    <label for="userRoleSelect">Роль:</label>
+                    <select id="userRoleSelect" class="role-select">
+                        <option value="user">Пользователь</option>
+                        <option value="admin">Администратор</option>
+                        <option value="owner">Владелец</option>
+                    </select>
+                </div>
+                <div class="admin-controls">
+                    <button type="submit" class="admin-btn primary">
+                        <i class="fas fa-save"></i> Сохранить роль
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="db.js"></script>
+    <script src="management.js"></script>
+    <script>
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeManagementPage();
+        });
+    </script>
+</body>
+</html>
