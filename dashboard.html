@@ -1,31 +1,90 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <!-- Потом загружаем твои скрипты, которые используют эту библиотеку -->
     <meta charset="UTF-8">
-    <title>Личный кабинет клана</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bobix Corp - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="dashboard-container">
-        <div class="sidebar">
-            <h3 style="color:#ffcc00">МЕНЮ</h3>
-            <button onclick="loadSection('players')">Clan Players</button>
-            <button onclick="loadSection('top')">Top Of Clan</button>
-            <button id="adminBtn" style="display:none" onclick="loadSection('admin')">Admin Panel</button>
-            <button id="ownerBtn" style="display:none" onclick="loadSection('owner')">Owner Panel</button>
-            <button onclick="_supabase.auth.signOut().then(()=>location.href='index.html')" style="margin-top:50px; border-color: red; color: red;">Выйти</button>
+<body class="dashboard-body">
+    <div class="grid-bg"></div>
+    
+    <header>
+        <div class="header-container">
+            <div class="logo" onclick="location.href='index.html'">
+                <i class="fas fa-shield-alt logo-icon"></i>
+                <div class="logo-text">BOBIX<span>CORP</span></div>
+            </div>
+            <nav>
+                <ul id="mainNav">
+                    <li><a href="#" class="active" onclick="loadSection('players')">Игроки</a></li>
+                    <li><a href="#" id="adminBtn" style="display:none" onclick="loadSection('admin')">Админ Панель</a></li>
+                    <li><a href="#" id="ownerBtn" style="display:none" onclick="loadSection('owner')">Owner Panel</a></li>
+                    <li><a href="#" onclick="logout()" class="logout-link"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
+                </ul>
+            </nav>
         </div>
-        <div class="content-area" id="mainContent">
-            <h1>Выберите раздел слева</h1>
-        </div>
-    </div>
-             <script src="https://cdn.jsdelivr.net"></script>
-    <script src="db.js"></script>
-    <script src="admin.js"></script>
-    <!-- ... остальная часть HTML ... -->
+    </header>
 
-    <!-- Сначала загружаем библиотеку Supabase из CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <div class="container">
+        <section class="thresholds-info" id="mainContent">
+            <div class="hero">
+                <h1 id="welcomeText">Загрузка...</h1>
+                <p>Добро пожаловать в систему управления кланом. Выберите раздел в меню выше.</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Supabase & Logic -->
+    <script src="https://cdn.jsdelivr.net"></script>
+    <script src="db.js"></script>
+    <script>
+        async function checkRole() {
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (!user) { window.location.href = 'index.html'; return; }
+
+            document.getElementById('welcomeText').innerText = `ПРИВЕТ, ${user.user_metadata.username || 'БОЕЦ'}`;
+
+            let { data: profile } = await _supabase.from('profiles').select('role').eq('id', user.id).single();
+
+            if (profile?.role === 'admin' || profile?.role === 'owner') {
+                document.getElementById('adminBtn').style.display = 'block';
+            }
+            if (profile?.role === 'owner') {
+                document.getElementById('ownerBtn').style.display = 'block';
+            }
+        }
+
+        function loadSection(name) {
+            const content = document.getElementById('mainContent');
+            // Анимация затухания
+            content.style.opacity = 0;
+            
+            setTimeout(() => {
+                if(name === 'players') {
+                    content.innerHTML = `
+                        <h2><i class="fas fa-users"></i> Clan Players</h2>
+                        <div class="threshold-types">
+                            <div class="threshold-card"><h3>Загрузка списка...</h3></div>
+                        </div>`;
+                }
+                if(name === 'admin') {
+                    content.innerHTML = `
+                        <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
+                        <p>Управление участниками и модерация данных.</p>`;
+                }
+                content.style.opacity = 1;
+            }, 300);
+        }
+
+        async function logout() {
+            await _supabase.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        checkRole();
+    </script>
 </body>
 </html>
