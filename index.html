@@ -95,37 +95,25 @@
             </div>
         </section>
         <!-- Секция News -->
-<section id="news" class="content-section">
-    <div class="section-header">
-        <h2><i class="fas fa-newspaper"></i> Новости Bobix Corporation</h2>
-        <p>Актуальные новости и объявления клана</p>
+<!-- Секция Новости -->
+<section class="thresholds-info fade-in" id="news">
+    <h2><i class="fas fa-newspaper"></i> НОВОСТИ КЛАНА</h2>
+    <p>Последние обновления и объявления Bobix Corporation</p>
+    
+    <div class="news-preview" id="newsPreview">
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Загрузка новостей...</p>
+        </div>
     </div>
     
-    <div class="news-content">
-        <!-- Кнопка добавления поста (только для админов/владельцев) -->
-        <div class="admin-controls-header admin-only" style="display: none;">
-            <div>
-                <h3><i class="fas fa-bullhorn"></i> Управление новостями</h3>
-                <p>Публикуйте новости и объявления для всего клана</p>
-            </div>
-            <div class="admin-actions">
-                <button class="admin-btn primary" onclick="openCreatePostModal()">
-                    <i class="fas fa-plus-circle"></i> Опубликовать пост
-                </button>
-                <button class="admin-btn" onclick="loadNewsPosts()">
-                    <i class="fas fa-sync-alt"></i> Обновить
-                </button>
-            </div>
-        </div>
-        
-        <!-- Список новостей -->
-        <div class="news-posts" id="newsPosts">
-            <div class="loading">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Загрузка новостей...</p>
-            </div>
-        </div>
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="#login" class="btn" onclick="openAuthModal()">
+            <i class="fas fa-sign-in-alt"></i> ВОЙТИ ДЛЯ ПРОСМОТРА ВСЕХ НОВОСТЕЙ
+        </a>
     </div>
+</section>
+        
     <!-- Модальное окно создания поста -->
 <div id="createPostModal" class="modal">
     <div class="modal-content" style="max-width: 700px;">
@@ -271,6 +259,87 @@
             
             checkCurrentSession();
         });
+        async function loadLatestNews() {
+    try {
+        const newsPreview = document.getElementById('newsPreview');
+        if (!newsPreview) return;
+        
+        // Показываем только 3 последние новости
+        const { data: posts, error } = await _supabase
+            .from('news_posts')
+            .select('*')
+            .eq('is_published', true)
+            .order('created_at', { ascending: false })
+            .limit(3);
+        
+        if (error) {
+            console.error('Ошибка загрузки новостей:', error);
+            newsPreview.innerHTML = `
+                <div class="threshold-card">
+                    <p>Новости временно недоступны</p>
+                </div>
+            `;
+            return;
+        }
+        
+        if (!posts || posts.length === 0) {
+            newsPreview.innerHTML = `
+                <div class="threshold-card">
+                    <h3><i class="fas fa-newspaper"></i> Новостей пока нет</h3>
+                    <p>Следите за обновлениями!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        
+        posts.forEach(post => {
+            // Обрезаем текст для предпросмотра
+            const previewText = post.content.length > 150 
+                ? post.content.substring(0, 150) + '...' 
+                : post.content;
+                
+            // Форматируем дату
+            const postDate = new Date(post.created_at);
+            const formattedDate = postDate.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            
+            html += `
+                <div class="threshold-card news-preview-card">
+                    <div class="news-date">
+                        <i class="fas fa-calendar"></i> ${formattedDate}
+                    </div>
+                    <h3>${escapeHtml(post.title)}</h3>
+                    <p>${escapeHtml(previewText)}</p>
+                    <div class="news-author">
+                        <i class="fas fa-user"></i> ${escapeHtml(post.author_name || 'Администратор')}
+                    </div>
+                </div>
+            `;
+        });
+        
+        newsPreview.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Неожиданная ошибка:', error);
+    }
+}
+
+// Функция экранирования HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Загружаем новости при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    loadLatestNews();
+});
     </script>
 </body>
 </html>
