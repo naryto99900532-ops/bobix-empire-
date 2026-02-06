@@ -392,7 +392,109 @@
     </div>
 
     <!-- После существующих модальных окон добавляем: -->
-
+<!-- Модальное окно редактора новости -->
+<div id="newsEditorModal" class="modal">
+    <div class="modal-content" style="max-width: 800px; max-height: 95vh; width: 90vw;">
+        <div class="modal-header">
+            <h2><i class="fas fa-edit"></i> Создание новости</h2>
+            <span class="close-modal" onclick="closeNewsEditor()">&times;</span>
+        </div>
+        
+        <div class="modal-body">
+            <form id="newsEditorForm">
+                <!-- Заголовок -->
+                <div class="form-group">
+                    <label for="newsTitle"><i class="fas fa-heading"></i> Заголовок новости</label>
+                    <input type="text" id="newsTitle" class="edit-input" placeholder="Введите заголовок новости" required>
+                </div>
+                
+                <!-- Содержимое с большим текстовым полем -->
+                <div class="form-group">
+                    <label for="newsContent"><i class="fas fa-file-alt"></i> Содержание новости</label>
+                    <div class="news-content-editor">
+                        <textarea id="newsContent" placeholder="Напишите подробное содержание новости... (Поддерживаются переносы строк и форматирование)" 
+                                  rows="12" required></textarea>
+                        <div class="editor-tools">
+                            <button type="button" class="editor-tool" onclick="insertTextAtCursor('**жирный текст**')" title="Жирный текст">
+                                <i class="fas fa-bold"></i>
+                            </button>
+                            <button type="button" class="editor-tool" onclick="insertTextAtCursor('*курсивный текст*')" title="Курсив">
+                                <i class="fas fa-italic"></i>
+                            </button>
+                            <button type="button" class="editor-tool" onclick="insertTextAtCursor('[ссылка](https://example.com)')" title="Вставить ссылку">
+                                <i class="fas fa-link"></i>
+                            </button>
+                            <button type="button" class="editor-tool" onclick="insertTextAtCursor('- пункт списка')" title="Список">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Загрузка изображения -->
+                <div class="form-group">
+                    <label><i class="fas fa-image"></i> Изображение (опционально)</label>
+                    <div class="image-upload-section">
+                        <input type="file" id="newsImage" accept="image/*" style="display: none;" 
+                               onchange="handleNewsImageUpload(this)">
+                        
+                        <div class="image-upload-box" id="imageUploadBox" onclick="document.getElementById('newsImage').click()">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">
+                                <p>Нажмите для выбора изображения или перетащите его сюда</p>
+                                <small>Поддерживаемые форматы: JPG, PNG, GIF, WebP (максимум 10MB)</small>
+                            </div>
+                        </div>
+                        
+                        <div class="image-preview-container" id="imagePreviewContainer" style="display: none;">
+                            <div class="preview-header">
+                                <span>Предпросмотр изображения:</span>
+                                <button type="button" class="remove-image-btn" onclick="removeNewsImage()">
+                                    <i class="fas fa-times"></i> Удалить
+                                </button>
+                            </div>
+                            <div class="image-preview" id="newsImagePreview">
+                                <!-- Здесь появится изображение -->
+                            </div>
+                        </div>
+                        
+                        <!-- Индикатор загрузки -->
+                        <div id="imageUploadProgress" style="display: none; margin-top: 10px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                            <div class="progress-text">Загрузка: <span id="uploadPercentage">0</span>%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Настройки публикации -->
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="newsPublished" checked>
+                        <span><i class="fas fa-globe"></i> Опубликовать сразу</span>
+                    </label>
+                    <small class="form-hint">Если не отмечено, новость сохранится как черновик</small>
+                </div>
+                
+                <!-- Кнопки действий -->
+                <div class="form-actions">
+                    <button type="submit" class="admin-btn primary large">
+                        <i class="fas fa-paper-plane"></i> Опубликовать новость
+                    </button>
+                    <button type="button" class="admin-btn secondary" onclick="saveNewsAsDraft()">
+                        <i class="fas fa-save"></i> Сохранить черновик
+                    </button>
+                    <button type="button" class="admin-btn" onclick="closeNewsEditor()">
+                        <i class="fas fa-times"></i> Отмена
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <!-- Модальное окно добавления игрока -->
 <div id="addPlayerModal" class="modal">
     <div class="modal-content">
@@ -535,109 +637,7 @@
         </div>
     </div>
 </div>
-<!-- Модальное окно редактора новости -->
-<div id="newsEditorModal" class="modal">
-    <div class="modal-content" style="max-width: 800px; max-height: 95vh; width: 90vw;">
-        <div class="modal-header">
-            <h2><i class="fas fa-edit"></i> Создание новости</h2>
-            <span class="close-modal" onclick="closeNewsEditor()">&times;</span>
-        </div>
-        
-        <div class="modal-body">
-            <form id="newsEditorForm">
-                <!-- Заголовок -->
-                <div class="form-group">
-                    <label for="newsTitle"><i class="fas fa-heading"></i> Заголовок новости</label>
-                    <input type="text" id="newsTitle" class="edit-input" placeholder="Введите заголовок новости" required>
-                </div>
-                
-                <!-- Содержимое с большим текстовым полем -->
-                <div class="form-group">
-                    <label for="newsContent"><i class="fas fa-file-alt"></i> Содержание новости</label>
-                    <div class="news-content-editor">
-                        <textarea id="newsContent" placeholder="Напишите подробное содержание новости... (Поддерживаются переносы строк и форматирование)" 
-                                  rows="12" required></textarea>
-                        <div class="editor-tools">
-                            <button type="button" class="editor-tool" onclick="insertTextAtCursor('**жирный текст**')" title="Жирный текст">
-                                <i class="fas fa-bold"></i>
-                            </button>
-                            <button type="button" class="editor-tool" onclick="insertTextAtCursor('*курсивный текст*')" title="Курсив">
-                                <i class="fas fa-italic"></i>
-                            </button>
-                            <button type="button" class="editor-tool" onclick="insertTextAtCursor('[ссылка](https://example.com)')" title="Вставить ссылку">
-                                <i class="fas fa-link"></i>
-                            </button>
-                            <button type="button" class="editor-tool" onclick="insertTextAtCursor('- пункт списка')" title="Список">
-                                <i class="fas fa-list"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Загрузка изображения -->
-                <div class="form-group">
-                    <label><i class="fas fa-image"></i> Изображение (опционально)</label>
-                    <div class="image-upload-section">
-                        <input type="file" id="newsImage" accept="image/*" style="display: none;" 
-                               onchange="handleNewsImageUpload(this)">
-                        
-                        <div class="image-upload-box" id="imageUploadBox" onclick="document.getElementById('newsImage').click()">
-                            <div class="upload-icon">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                            </div>
-                            <div class="upload-text">
-                                <p>Нажмите для выбора изображения или перетащите его сюда</p>
-                                <small>Поддерживаемые форматы: JPG, PNG, GIF, WebP (максимум 10MB)</small>
-                            </div>
-                        </div>
-                        
-                        <div class="image-preview-container" id="imagePreviewContainer" style="display: none;">
-                            <div class="preview-header">
-                                <span>Предпросмотр изображения:</span>
-                                <button type="button" class="remove-image-btn" onclick="removeNewsImage()">
-                                    <i class="fas fa-times"></i> Удалить
-                                </button>
-                            </div>
-                            <div class="image-preview" id="newsImagePreview">
-                                <!-- Здесь появится изображение -->
-                            </div>
-                        </div>
-                        
-                        <!-- Индикатор загрузки -->
-                        <div id="imageUploadProgress" style="display: none; margin-top: 10px;">
-                            <div class="progress-bar">
-                                <div class="progress-fill"></div>
-                            </div>
-                            <div class="progress-text">Загрузка: <span id="uploadPercentage">0</span>%</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Настройки публикации -->
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="newsPublished" checked>
-                        <span><i class="fas fa-globe"></i> Опубликовать сразу</span>
-                    </label>
-                    <small class="form-hint">Если не отмечено, новость сохранится как черновик</small>
-                </div>
-                
-                <!-- Кнопки действий -->
-                <div class="form-actions">
-                    <button type="submit" class="admin-btn primary large">
-                        <i class="fas fa-paper-plane"></i> Опубликовать новость
-                    </button>
-                    <button type="button" class="admin-btn secondary" onclick="saveNewsAsDraft()">
-                        <i class="fas fa-save"></i> Сохранить черновик
-                    </button>
-                    <button type="button" class="admin-btn" onclick="closeNewsEditor()">
-                        <i class="fas fa-times"></i> Отмена
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
     <!-- 1. Supabase и база -->
 <!-- В management.html -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
