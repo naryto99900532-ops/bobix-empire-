@@ -693,5 +693,71 @@
             initializeManagementPage();
         });
     </script>
+    <!-- 1. Supabase и база -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="db.js"></script>
+
+<!-- 2. Базовые функции -->
+<script src="session-fix.js"></script>
+
+<!-- 3. Функции модулей -->
+<script src="simple-news.js"></script>
+<script src="admin-functions.js"></script>
+
+<!-- 4. Основной скрипт управления -->
+<script src="management.js"></script>
+
+<!-- 5. Загрузчик для инициализации -->
+<script src="loader.js"></script>
+
+<!-- 6. Финальная инициализация -->
+<script>
+    // Финальная проверка и инициализация
+    setTimeout(function() {
+        console.log('=== ФИНАЛЬНАЯ ИНИЦИАЛИЗАЦИЯ ===');
+        
+        // Проверяем ключевые функции
+        const checkFunctions = ['openCreatePostModal', 'loadNewsPosts', 'logout'];
+        let allGood = true;
+        
+        checkFunctions.forEach(func => {
+            if (typeof window[func] !== 'function') {
+                console.error(`❌ Функция ${func} не найдена!`);
+                allGood = false;
+            } else {
+                console.log(`✅ Функция ${func} доступна`);
+            }
+        });
+        
+        if (!allGood) {
+            console.warn('Не все функции загружены. Попытка восстановления...');
+            
+            // Пробуем загрузить простые версии
+            if (typeof window.openCreatePostModal !== 'function') {
+                window.openCreatePostModal = function() {
+                    const modal = document.getElementById('createPostModal');
+                    if (modal) {
+                        modal.style.display = 'flex';
+                    } else {
+                        alert('Для создания новостей обновите страницу (Ctrl+F5)');
+                    }
+                };
+            }
+            
+            if (typeof window.loadNewsPosts !== 'function') {
+                window.loadNewsPosts = function() {
+                    location.reload();
+                };
+            }
+        }
+        
+        // Инициализируем если есть функция
+        if (typeof initializeManagementPage === 'function') {
+            initializeManagementPage();
+        }
+        
+        console.log('=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===');
+    }, 1000);
+</script>
 </body>
 </html>
