@@ -638,35 +638,52 @@
         </form>
     </div>
 </div>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="db.js"></script>
-    <script src="management.js"></script>
-    <script src="admin-functions.js"></script>
-<script src="news-functions.js"></script>
-    <!-- В index.html после auth.js -->
+    <!-- Сначала базовые скрипты -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="db.js"></script>
 <script src="session-fix.js"></script>
 
-<!-- В management.html после db.js -->
-<script src="session-fix.js"></script>
+<!-- Затем скрипты функций -->
+<script src="news-functions.js"></script>
+<script src="admin-functions.js"></script>
+
+<!-- И только потом management.js -->
+<script src="management.js"></script>
+
+<!-- Инициализация -->
 <script>
-    // Проверка что функции существуют
+    // Инициализация при загрузке страницы
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Проверка функций:');
-        console.log('openCreatePostModal:', typeof openCreatePostModal);
-        console.log('closeCreatePostModal:', typeof closeCreatePostModal);
-        console.log('loadNewsPosts:', typeof loadNewsPosts);
+        console.log('Загрузка страницы управления...');
         
-        // Добавляем обработчик для кнопки
+        // Проверяем доступность функций
+        console.log('Проверка функций:');
+        console.log('openCreatePostModal:', typeof window.openCreatePostModal);
+        console.log('closeCreatePostModal:', typeof window.closeCreatePostModal);
+        console.log('loadNewsPosts:', typeof window.loadNewsPosts);
+        
+        // Добавляем обработчики для кнопок
         const createBtn = document.getElementById('createNewsBtn');
         if (createBtn) {
             createBtn.onclick = function() {
-                if (typeof openCreatePostModal === 'function') {
-                    openCreatePostModal();
+                if (typeof window.openCreatePostModal === 'function') {
+                    window.openCreatePostModal();
                 } else {
                     console.error('Функция openCreatePostModal не найдена!');
-                    showNotification('Ошибка: функция не загружена', 'error');
+                    alert('Функция создания новости не загружена. Обновите страницу.');
                 }
             };
+        }
+        
+        // Инициализация страницы управления
+        if (typeof initializeManagementPage === 'function') {
+            initializeManagementPage();
+        } else {
+            console.error('Функция initializeManagementPage не найдена!');
+            // Пробуем загрузить основные функции
+            if (typeof checkAuthAndRedirect === 'function') {
+                checkAuthAndRedirect();
+            }
         }
     });
 </script>
