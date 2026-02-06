@@ -93,6 +93,86 @@
                 </div>
             </div>
         </section>
+        <!-- Секция News -->
+<section id="news" class="content-section">
+    <div class="section-header">
+        <h2><i class="fas fa-newspaper"></i> Новости Bobix Corporation</h2>
+        <p>Актуальные новости и объявления клана</p>
+    </div>
+    
+    <div class="news-content">
+        <!-- Кнопка добавления поста (только для админов/владельцев) -->
+        <div class="admin-controls-header admin-only" style="display: none;">
+            <div>
+                <h3><i class="fas fa-bullhorn"></i> Управление новостями</h3>
+                <p>Публикуйте новости и объявления для всего клана</p>
+            </div>
+            <div class="admin-actions">
+                <button class="admin-btn primary" onclick="openCreatePostModal()">
+                    <i class="fas fa-plus-circle"></i> Опубликовать пост
+                </button>
+                <button class="admin-btn" onclick="loadNewsPosts()">
+                    <i class="fas fa-sync-alt"></i> Обновить
+                </button>
+            </div>
+        </div>
+        
+        <!-- Список новостей -->
+        <div class="news-posts" id="newsPosts">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Загрузка новостей...</p>
+            </div>
+        </div>
+    </div>
+    <!-- Модальное окно создания поста -->
+<div id="createPostModal" class="modal">
+    <div class="modal-content" style="max-width: 700px;">
+        <span class="close-modal" onclick="closeCreatePostModal()">&times;</span>
+        <h2><i class="fas fa-edit"></i> Создать новый пост</h2>
+        <form id="createPostForm">
+            <div class="form-group">
+                <label for="postTitle"><i class="fas fa-heading"></i> Заголовок</label>
+                <input type="text" id="postTitle" class="edit-input" placeholder="Введите заголовок поста" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="postContent"><i class="fas fa-file-alt"></i> Содержание</label>
+                <textarea id="postContent" class="edit-input" placeholder="Введите содержание поста" rows="8" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="postImage"><i class="fas fa-image"></i> Изображение (опционально)</label>
+                <div class="image-upload-container">
+                    <input type="file" id="postImage" class="edit-input" accept="image/*" onchange="previewImage(event)">
+                    <div class="image-preview" id="imagePreview">
+                        <p>Предпросмотр изображения появится здесь</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="postPublished" checked>
+                    <span>Опубликовать сразу</span>
+                </label>
+            </div>
+            
+            <div class="admin-controls">
+                <button type="submit" class="admin-btn primary">
+                    <i class="fas fa-paper-plane"></i> Опубликовать
+                </button>
+                <button type="button" class="admin-btn" onclick="saveAsDraft()">
+                    <i class="fas fa-save"></i> Сохранить черновик
+                </button>
+                <button type="button" class="admin-btn" onclick="closeCreatePostModal()">
+                    <i class="fas fa-times"></i> Отмена
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</section>
     </main>
 
     <!-- Модальное окно авторизации -->
