@@ -1607,3 +1607,130 @@ input[aria-hidden="true"] {
     padding-top: 10px;
     border-top: 1px solid rgba(255, 215, 0, 0.1);
 }
+/* Стили для новостей в панели управления */
+.no-news-message {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(17, 17, 17, 0.9);
+    border-radius: 15px;
+    border: 2px dashed rgba(255, 215, 0, 0.3);
+}
+
+.no-news-icon {
+    font-size: 4rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+}
+
+.no-news-message h3 {
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+.no-news-message p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+/* Кнопка "Читать полностью" */
+.read-more-btn {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 8px 16px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: var(--accent);
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.read-more-btn:hover {
+    background: rgba(255, 215, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.read-more-btn i {
+    margin-right: 5px;
+}
+
+/* Область загрузки изображений */
+.image-upload-area {
+    border: 2px dashed rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.image-upload-area:hover {
+    border-color: var(--accent);
+    background: rgba(255, 215, 0, 0.05);
+}
+
+.image-upload-area p {
+    color: var(--accent);
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.image-upload-area i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.image-preview-content {
+    position: relative;
+}
+
+.image-preview-content img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.image-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+/* Подсказки форм */
+.form-hint {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+/* Действия формы */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+/* Контейнер изображения в посте */
+.post-image-container {
+    margin: 1.5rem 0;
+    border-radius: 10px;
+    overflow: hidden;
+    max-height: 400px;
+}
+
+.post-image {
+    width: 
