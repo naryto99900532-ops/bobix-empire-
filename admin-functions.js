@@ -337,6 +337,300 @@ function renderAdministrators(admins) {
     
     adminsList.innerHTML = html;
 }
+/**
+ * Сортировка игроков в топе
+ */
+let draggingPlayerId = null;
+
+/**
+ * Инициализация drag-and-drop для сортировки
+ */
+function initializePlayerSorting() {
+    const playersList = document.getElementById('playersList');
+    if (!playersList) return;
+    
+    playersList.addEventListener('dragstart', handleDragStart);
+    playersList.addEventListener('dragover', handleDragOver);
+    playersList.addEventListener('drop', handleDrop);
+    playersList.addEventListener('dragend', handleDragEnd);
+}
+
+/**
+ * Начало перетаскивания
+ */
+function handleDragStart(e) {
+    if (!e.target.closest('.player-management-card')) return;
+    
+    const playerCard = e.target.closest('.player-management-card');
+    draggingPlayerId = playerCard.dataset.playerId;
+    
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggingPlayerId);
+    
+    playerCard.classList.add('dragging');
+}
+
+/**
+ * Перетаскивание над элементом
+ */
+function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    const playerCard = e.target.closest('.player-management-card');
+    if (playerCard && playerCard.dataset.playerId !== draggingPlayerId) {
+        playerCard.classList.add('drag-over');
+    }
+}
+
+/**
+ * Сброс перетаскивания
+ */
+function handleDrop(e) {
+    e.preventDefault();
+    
+    const playerCard = e.target.closest('.player-management-card');
+    if (!playerCard || !draggingPlayerId) return;
+    
+    const targetPlayerId = playerCard.dataset.playerId;
+    if (targetPlayerId === draggingPlayerId) return;
+    
+    // Меняем игроков местами
+    swapPlayers(draggingPlayerId, targetPlayerId);
+    
+    // Убираем классы
+    document.querySelectorAll('.player-management-card').forEach(card => {
+        card.classList.remove('drag-over');
+    });
+}
+
+/**
+ * Конец перетаскивания
+ */
+function handleDragEnd(e) {
+    document.querySelectorAll('.player-management-card').forEach(card => {
+        card.classList.remove('dragging', 'drag-over');
+    });
+    draggingPlayerId = null;
+}
+
+/**
+ * Меняем игроков местами
+ */
+async function swapPlayers(playerId1, playerId2) {
+    if (currentUserRole !== 'admin' && currentUserRole !== 'owner') {
+        showNotification('Только администраторы могут менять порядок игроков', 'error');
+        return;
+    }
+    
+    try {
+        // Находим игроков
+        const player1 = playersData.find(p => p.id === playerId1);
+        const player2 = playersData.find(p => p.id === playerId2);
+        
+        if (!player1 || !player2) return;
+        
+        // Меняем их счета местами (или можно добавить поле 'position')
+        const tempScore = player1.score;
+        
+        // Обновляем первого игрока
+        const { error: error1 } = await _supabase
+            .from('players')
+            .update({ 
+                score: player2.score,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', playerId1);
+        
+        if (error1) throw error1;
+        
+        // Обновляем второго игрока
+        const { error: error2 } = await _supabase
+            .from('players')
+            .update({ 
+                score: tempScore,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', playerId2);
+        
+        if (error2) throw error2;
+        
+        showNotification('Порядок игроков изменен!', 'success');
+        
+        // Обновляем список
+        await loadPlayers();
+        
+    } catch (error) {
+        console.error('Ошибка при изменении порядка:', error);
+        showNotification('Ошибка при изменении порядка игроков', 'error');
+    }
+}
+
+/**
+ * Обновляем рендер игроков с поддержкой drag-and-drop
+ */
+function updatePlayersRender() {
+    const playersList = document.getElementById('playersList');
+    if (!playersList || !playersData.length) return;
+    
+    // Сортируем игроков по счету
+    const sortedPlayers = [...playersData].sort((a, b) => (b.score || 0) - (a.score || 0));
+    
+    let html = '';
+    
+    sortedPlayers.forEach((player, index) => {
+        const isAdmin = currentUserRole === 'admin' || currentUserRole === 'owner';
+        const editButton = isAdmin ? `
+            <button class="admin-btn" onclick="openEditPlayerModal('${player.id}')" style="margin-top: 10px;">
+                <i class="fas fa-edit"></i> Редактировать
+            </button>
+        ` : '';
+        
+        // Кнопки для изменения позиции (только для админов)
+        const positionControls = isAdmin ? `
+            <div class="position-controls">
+                <button class="position-btn up" onclick="movePlayerUp('${player.id}')" ${index === 0 ? 'disabled' : ''}>
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button class="position-btn down" onclick="movePlayerDown('${player.id}')" ${index === sortedPlayers.length - 1 ? 'disabled' : ''}>
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            </div>
+        ` : '';
+        
+        html += `
+            <div class="player-management-card player-card-with-details" 
+                 data-player-id="${player.id}"
+                 draggable="${isAdmin ? 'true' : 'false'}">
+                
+                ${positionControls}
+                
+                <div class="player-rank">#${index + 1}
+                    ${isAdmin ? '<i class="fas fa-arrows-alt drag-handle"></i>' : ''}
+                </div>
+                
+                <div class="player-info">
+                    <div class="player-avatar" onclick="openPlayerDetails('${player.id}')" style="cursor: pointer;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <h3 class="player-name" style="cursor: pointer;" onclick="openPlayerDetails('${player.id}')">
+                            ${escapeHtml(player.nickname || 'Без имени')}
+                        </h3>
+                        <p>Счет: <strong>${player.score || 0}</strong></p>
+                    </div>
+                </div>
+                
+                <div class="player-description">
+                    ${escapeHtml(player.description || 'Описание отсутствует')}
+                </div>
+                
+                <div class="player-details-hover">
+                    <div class="detail-row">
+                        <span class="detail-label">Roblox:</span>
+                        <span class="detail-value roblox">${escapeHtml(player.roblox_username || 'Не указан')}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Discord:</span>
+                        <span class="detail-value discord">${escapeHtml(player.discord || 'Не указан')}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Добавлен:</span>
+                        <span class="detail-value">${new Date(player.created_at).toLocaleDateString('ru-RU')}</span>
+                    </div>
+                </div>
+                
+                ${editButton}
+            </div>
+        `;
+    });
+    
+    playersList.innerHTML = html;
+    updatePlayerStats();
+    
+    // Инициализируем drag-and-drop если пользователь админ
+    if (currentUserRole === 'admin' || currentUserRole === 'owner') {
+        initializePlayerSorting();
+    }
+}
+
+/**
+ * Переместить игрока вверх в рейтинге
+ */
+async function movePlayerUp(playerId) {
+    await changePlayerPosition(playerId, 'up');
+}
+
+/**
+ * Переместить игрока вниз в рейтинге
+ */
+async function movePlayerDown(playerId) {
+    await changePlayerPosition(playerId, 'down');
+}
+
+/**
+ * Изменить позицию игрока
+ */
+async function changePlayerPosition(playerId, direction) {
+    if (currentUserRole !== 'admin' && currentUserRole !== 'owner') {
+        showNotification('Только администраторы могут менять порядок игроков', 'error');
+        return;
+    }
+    
+    try {
+        // Сортируем игроков по счету
+        const sortedPlayers = [...playersData].sort((a, b) => (b.score || 0) - (a.score || 0));
+        const currentIndex = sortedPlayers.findIndex(p => p.id === playerId);
+        
+        if (currentIndex === -1) return;
+        
+        let targetIndex;
+        if (direction === 'up' && currentIndex > 0) {
+            targetIndex = currentIndex - 1;
+        } else if (direction === 'down' && currentIndex < sortedPlayers.length - 1) {
+            targetIndex = currentIndex + 1;
+        } else {
+            return;
+        }
+        
+        // Меняем счета местами
+        const currentPlayer = sortedPlayers[currentIndex];
+        const targetPlayer = sortedPlayers[targetIndex];
+        
+        const tempScore = currentPlayer.score;
+        
+        // Обновляем текущего игрока
+        const { error: error1 } = await _supabase
+            .from('players')
+            .update({ 
+                score: targetPlayer.score,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', playerId);
+        
+        if (error1) throw error1;
+        
+        // Обновляем целевого игрока
+        const { error: error2 } = await _supabase
+            .from('players')
+            .update({ 
+                score: tempScore,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', targetPlayer.id);
+        
+        if (error2) throw error2;
+        
+        showNotification('Позиция игрока изменена!', 'success');
+        
+        // Обновляем список
+        await loadPlayers();
+        
+    } catch (error) {
+        console.error('Ошибка при изменении позиции:', error);
+        showNotification('Ошибка при изменении позиции игрока', 'error');
+    }
+}
 
 /**
  * Обновление статистики администраторов
@@ -669,298 +963,4 @@ if (typeof window !== 'undefined') {
     window.closeEditAdminModal = closeEditAdminModal;
     window.openPlayerDetails = openPlayerDetails;
     window.closePlayerDetailsModal = closePlayerDetailsModal;
-}
-/**
- * Сортировка игроков в топе
- */
-let draggingPlayerId = null;
-
-/**
- * Инициализация drag-and-drop для сортировки
- */
-function initializePlayerSorting() {
-    const playersList = document.getElementById('playersList');
-    if (!playersList) return;
-    
-    playersList.addEventListener('dragstart', handleDragStart);
-    playersList.addEventListener('dragover', handleDragOver);
-    playersList.addEventListener('drop', handleDrop);
-    playersList.addEventListener('dragend', handleDragEnd);
-}
-
-/**
- * Начало перетаскивания
- */
-function handleDragStart(e) {
-    if (!e.target.closest('.player-management-card')) return;
-    
-    const playerCard = e.target.closest('.player-management-card');
-    draggingPlayerId = playerCard.dataset.playerId;
-    
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', draggingPlayerId);
-    
-    playerCard.classList.add('dragging');
-}
-
-/**
- * Перетаскивание над элементом
- */
-function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    
-    const playerCard = e.target.closest('.player-management-card');
-    if (playerCard && playerCard.dataset.playerId !== draggingPlayerId) {
-        playerCard.classList.add('drag-over');
-    }
-}
-
-/**
- * Сброс перетаскивания
- */
-function handleDrop(e) {
-    e.preventDefault();
-    
-    const playerCard = e.target.closest('.player-management-card');
-    if (!playerCard || !draggingPlayerId) return;
-    
-    const targetPlayerId = playerCard.dataset.playerId;
-    if (targetPlayerId === draggingPlayerId) return;
-    
-    // Меняем игроков местами
-    swapPlayers(draggingPlayerId, targetPlayerId);
-    
-    // Убираем классы
-    document.querySelectorAll('.player-management-card').forEach(card => {
-        card.classList.remove('drag-over');
-    });
-}
-
-/**
- * Конец перетаскивания
- */
-function handleDragEnd(e) {
-    document.querySelectorAll('.player-management-card').forEach(card => {
-        card.classList.remove('dragging', 'drag-over');
-    });
-    draggingPlayerId = null;
-}
-
-/**
- * Меняем игроков местами
- */
-async function swapPlayers(playerId1, playerId2) {
-    if (currentUserRole !== 'admin' && currentUserRole !== 'owner') {
-        showNotification('Только администраторы могут менять порядок игроков', 'error');
-        return;
-    }
-    
-    try {
-        // Находим игроков
-        const player1 = playersData.find(p => p.id === playerId1);
-        const player2 = playersData.find(p => p.id === playerId2);
-        
-        if (!player1 || !player2) return;
-        
-        // Меняем их счета местами (или можно добавить поле 'position')
-        const tempScore = player1.score;
-        
-        // Обновляем первого игрока
-        const { error: error1 } = await _supabase
-            .from('players')
-            .update({ 
-                score: player2.score,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', playerId1);
-        
-        if (error1) throw error1;
-        
-        // Обновляем второго игрока
-        const { error: error2 } = await _supabase
-            .from('players')
-            .update({ 
-                score: tempScore,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', playerId2);
-        
-        if (error2) throw error2;
-        
-        showNotification('Порядок игроков изменен!', 'success');
-        
-        // Обновляем список
-        await loadPlayers();
-        
-    } catch (error) {
-        console.error('Ошибка при изменении порядка:', error);
-        showNotification('Ошибка при изменении порядка игроков', 'error');
-    }
-}
-
-/**
- * Обновляем рендер игроков с поддержкой drag-and-drop
- */
-function updatePlayersRender() {
-    const playersList = document.getElementById('playersList');
-    if (!playersList || !playersData.length) return;
-    
-    // Сортируем игроков по счету
-    const sortedPlayers = [...playersData].sort((a, b) => (b.score || 0) - (a.score || 0));
-    
-    let html = '';
-    
-    sortedPlayers.forEach((player, index) => {
-        const isAdmin = currentUserRole === 'admin' || currentUserRole === 'owner';
-        const editButton = isAdmin ? `
-            <button class="admin-btn" onclick="openEditPlayerModal('${player.id}')" style="margin-top: 10px;">
-                <i class="fas fa-edit"></i> Редактировать
-            </button>
-        ` : '';
-        
-        // Кнопки для изменения позиции (только для админов)
-        const positionControls = isAdmin ? `
-            <div class="position-controls">
-                <button class="position-btn up" onclick="movePlayerUp('${player.id}')" ${index === 0 ? 'disabled' : ''}>
-                    <i class="fas fa-arrow-up"></i>
-                </button>
-                <button class="position-btn down" onclick="movePlayerDown('${player.id}')" ${index === sortedPlayers.length - 1 ? 'disabled' : ''}>
-                    <i class="fas fa-arrow-down"></i>
-                </button>
-            </div>
-        ` : '';
-        
-        html += `
-            <div class="player-management-card player-card-with-details" 
-                 data-player-id="${player.id}"
-                 draggable="${isAdmin ? 'true' : 'false'}">
-                
-                ${positionControls}
-                
-                <div class="player-rank">#${index + 1}
-                    ${isAdmin ? '<i class="fas fa-arrows-alt drag-handle"></i>' : ''}
-                </div>
-                
-                <div class="player-info">
-                    <div class="player-avatar" onclick="openPlayerDetails('${player.id}')" style="cursor: pointer;">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div>
-                        <h3 class="player-name" style="cursor: pointer;" onclick="openPlayerDetails('${player.id}')">
-                            ${escapeHtml(player.nickname || 'Без имени')}
-                        </h3>
-                        <p>Счет: <strong>${player.score || 0}</strong></p>
-                    </div>
-                </div>
-                
-                <div class="player-description">
-                    ${escapeHtml(player.description || 'Описание отсутствует')}
-                </div>
-                
-                <div class="player-details-hover">
-                    <div class="detail-row">
-                        <span class="detail-label">Roblox:</span>
-                        <span class="detail-value roblox">${escapeHtml(player.roblox_username || 'Не указан')}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Discord:</span>
-                        <span class="detail-value discord">${escapeHtml(player.discord || 'Не указан')}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Добавлен:</span>
-                        <span class="detail-value">${new Date(player.created_at).toLocaleDateString('ru-RU')}</span>
-                    </div>
-                </div>
-                
-                ${editButton}
-            </div>
-        `;
-    });
-    
-    playersList.innerHTML = html;
-    updatePlayerStats();
-    
-    // Инициализируем drag-and-drop если пользователь админ
-    if (currentUserRole === 'admin' || currentUserRole === 'owner') {
-        initializePlayerSorting();
-    }
-}
-
-/**
- * Переместить игрока вверх в рейтинге
- */
-async function movePlayerUp(playerId) {
-    await changePlayerPosition(playerId, 'up');
-}
-
-/**
- * Переместить игрока вниз в рейтинге
- */
-async function movePlayerDown(playerId) {
-    await changePlayerPosition(playerId, 'down');
-}
-
-/**
- * Изменить позицию игрока
- */
-async function changePlayerPosition(playerId, direction) {
-    if (currentUserRole !== 'admin' && currentUserRole !== 'owner') {
-        showNotification('Только администраторы могут менять порядок игроков', 'error');
-        return;
-    }
-    
-    try {
-        // Сортируем игроков по счету
-        const sortedPlayers = [...playersData].sort((a, b) => (b.score || 0) - (a.score || 0));
-        const currentIndex = sortedPlayers.findIndex(p => p.id === playerId);
-        
-        if (currentIndex === -1) return;
-        
-        let targetIndex;
-        if (direction === 'up' && currentIndex > 0) {
-            targetIndex = currentIndex - 1;
-        } else if (direction === 'down' && currentIndex < sortedPlayers.length - 1) {
-            targetIndex = currentIndex + 1;
-        } else {
-            return;
-        }
-        
-        // Меняем счета местами
-        const currentPlayer = sortedPlayers[currentIndex];
-        const targetPlayer = sortedPlayers[targetIndex];
-        
-        const tempScore = currentPlayer.score;
-        
-        // Обновляем текущего игрока
-        const { error: error1 } = await _supabase
-            .from('players')
-            .update({ 
-                score: targetPlayer.score,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', playerId);
-        
-        if (error1) throw error1;
-        
-        // Обновляем целевого игрока
-        const { error: error2 } = await _supabase
-            .from('players')
-            .update({ 
-                score: tempScore,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', targetPlayer.id);
-        
-        if (error2) throw error2;
-        
-        showNotification('Позиция игрока изменена!', 'success');
-        
-        // Обновляем список
-        await loadPlayers();
-        
-    } catch (error) {
-        console.error('Ошибка при изменении позиции:', error);
-        showNotification('Ошибка при изменении позиции игрока', 'error');
-    }
 }
