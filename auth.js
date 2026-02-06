@@ -66,6 +66,9 @@ function setupEventListeners() {
 /**
  * Переключение между режимами входа и регистрации
  */
+/**
+ * Переключение между режимами входа и регистрацией
+ */
 function handleToggleAuth() {
     isSignUp = !isSignUp;
     
@@ -79,16 +82,30 @@ function handleToggleAuth() {
         el.style.display = isSignUp ? 'block' : 'none';
     });
     
-    // Убираем required атрибуты при входе, добавляем при регистрации
+    // ОБНОВЛЯЕМ: Убираем required атрибуты когда поля скрыты
     const usernameInput = document.getElementById('username');
     const confirmPassInput = document.getElementById('confirmPass');
     
     if (isSignUp) {
-        if (usernameInput) usernameInput.required = true;
-        if (confirmPassInput) confirmPassInput.required = true;
+        // При регистрации - делаем поля обязательными
+        if (usernameInput) {
+            usernameInput.required = true;
+            usernameInput.removeAttribute('aria-hidden');
+        }
+        if (confirmPassInput) {
+            confirmPassInput.required = true;
+            confirmPassInput.removeAttribute('aria-hidden');
+        }
     } else {
-        if (usernameInput) usernameInput.required = false;
-        if (confirmPassInput) confirmPassInput.required = false;
+        // При входе - убираем required и скрываем от валидации
+        if (usernameInput) {
+            usernameInput.required = false;
+            usernameInput.setAttribute('aria-hidden', 'true');
+        }
+        if (confirmPassInput) {
+            confirmPassInput.required = false;
+            confirmPassInput.setAttribute('aria-hidden', 'true');
+        }
     }
     
     // Очищаем сообщения об ошибках
