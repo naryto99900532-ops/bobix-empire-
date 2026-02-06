@@ -382,3 +382,190 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Supabase не загружен');
     }
 });
+// В simple-news.js добавьте эту функцию рендеринга:
+function renderNewsPosts(posts) {
+    const container = document.getElementById('newsPosts');
+    if (!container) return;
+    
+    if (!posts || posts.length === 0) {
+        container.innerHTML = `
+            <div class="no-news-message">
+                <div class="no-news-icon">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                <h3>Новостей пока нет</h3>
+                <p>Будьте первым, кто опубликует новость!</p>
+                ${(currentUserRole === 'admin' || currentUserRole === 'owner') ? 
+                    `<button class="admin-btn primary" onclick="openNewsEditor()" style="margin-top: 15px;">
+                        <i class="fas fa-plus-circle"></i> Создать первую новость
+                    </button>` : ''
+                }
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    posts.forEach((post, index) => {
+        const canEdit = currentUserRole === 'admin' || currentUserRole === 'owner';
+        const editControls = canEdit ? `
+            <div class="post-actions">
+                <button class="post-action-btn edit" onclick="editNewsPost('${post.id}')">
+                    <i class="fas fa-edit"></i> Редактировать
+                </button>
+                <button class="post-action-btn delete" onclick="deleteNewsPost('${post.id}')">
+                    <i class="fas fa-trash-alt"></i> Удалить
+                </button>
+            </div>
+        ` : '';
+        
+        const date = new Date(post.created_at);
+        const formattedDate = date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Обрезаем текст для предпросмотра
+        const shortContent = post.content.length > 300 ? 
+            post.content.substring(0, 300) + '...' : 
+            post.content;
+        
+        // HTML для изображения
+        const imageHtml = post.image_url ? `
+            <div class="post-image-container" onclick="openFullscreenImage('${post.image_url}', '${escapeHtml(post.title)}')">
+                <img src="${post.image_url}" alt="${escapeHtml(post.title)}">
+                <div class="image-overlay">
+                    <i class="fas fa-expand-alt"></i> Нажмите для увеличения
+                </div>
+            </div>
+        ` : '';
+        
+        // Определяем нужно ли показывать кнопку "Читать далее"
+        const showReadMore = post.content.length > 300;
+        
+        html += `
+            <div class="news-post-card" id="news-post-${post.id}" data-expanded="false">
+                <div class="post-header">
+                    <h3 class="post-title">${escapeHtml(post.title)}</h3>
+                    <div class="post-date">${formattedDate}</div>
+                </div>
+                
+                ${imageHtml}
+                
+                <div class="post-content">
+                    ${formatNewsContent(shortContent)}
+                </div>
+                
+                ${showReadMore ? `
+                    <div class="expand-toggle" onclick="toggleNewsExpand('${post.id}')">
+                        <i class="fas fa-chevron-down"></i>
+                        <span>Читать далее</span>
+                    </div>
+                ` : ''}
+                
+                <div class="post-footer">
+                    <div class="post-author">
+                        <div class="author-avatar">
+                            ${(post.author_name || 'A').substring(0, 2).toUpperCase()}
+                        </div>
+                        <div class="author-info">
+                            <h4>${escapeHtml(post.author_name || 'Администратор')}</h4>
+                        </div>
+                    </div>
+                    
+                    <div class="post-stats">
+                        <span class="stat-item">
+                            <i class="fas fa-eye"></i> ${post.view_count || 0}
+                        </span>
+                        <span class="stat-item">
+                            <i class="fas fa-clock"></i> ${formatTimeAgo(post.created_at)}
+                        </span>
+                    </div>
+                </div>
+                
+                ${editControls}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+/**
+ * Форматирование контента новости
+ */
+function formatNewsContent(content) {
+    // Заменяем переносы строк на <br>
+    let formatted = escapeHtml(content).replace(/\n/g, '<br>');
+    
+    // Обрабатываем ссылки
+    formatted = formatted.replace(
+        /(https?:\/\/[^\s]+)/g,
+        '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+    
+    // Обрабатываем жирный текст **текст**
+    formatted = formatted.replace(
+        /\*\*(.*?)\*\*/g,
+        '<strong>$1</strong>'
+    );
+    
+    // Обрабатываем курсив *текст*
+    formatted = formatted.replace(
+        /\*(.*?)\*/g,
+        '<em>$1</em>'
+    );
+    
+    return formatted;
+}
+
+/**
+ * Развернуть/свернуть новость
+ */
+function toggleNewsExpand(postId) {
+    const postElement = document.getElementById(`news-post-${postId}`);
+    if (!postElement) return;
+    
+    const isExpanded = postElement.getAttribute('data-expanded') === 'true';
+    
+    if (!isExpanded) {
+        // Загружаем полный текст если нужно
+        const post = newsPosts.find(p => p.id === postId);
+        if (post && post.content.length > 300) {
+            const contentElement = postElement.querySelector('.post-content');
+            if (contentElement) {
+                contentElement.innerHTML = formatNewsContent(post.content);
+            }
+        }
+        
+        postElement.classList.add('expanded');
+        postElement.setAttribute('data-expanded', 'true');
+        
+        const toggleBtn = postElement.querySelector('.expand-toggle span');
+        if (toggleBtn) {
+            toggleBtn.textContent = 'Свернуть';
+        }
+        
+        const toggleIcon = postElement.querySelector('.expand-toggle i');
+        if (toggleIcon) {
+            toggleIcon.style.transform = 'rotate(180deg)';
+        }
+    } else {
+        postElement.classList.remove('expanded');
+        postElement.setAttribute('data-expanded', 'false');
+        
+        const toggleBtn = postElement.querySelector('.expand-toggle span');
+        if (toggleBtn) {
+            toggleBtn.textContent = 'Читать далее';
+        }
+        
+        const toggleIcon = postElement.querySelector('.expand-toggle i');
+        if (toggleIcon) {
+            toggleIcon.style.transform = 'rotate(0deg)';
+        }
+    }
+}
