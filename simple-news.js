@@ -35,7 +35,131 @@ window.initializeNews = async function() {
         console.error('Ошибка инициализации новостей:', error);
     }
 };
+// В simple-news.js добавьте:
+async function handleImageUpload(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    const preview = document.getElementById('imagePreview');
+    const progress = document.getElementById('uploadProgress');
+    
+    // Показываем предпросмотр
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.innerHTML = `
+            <div class="image-preview-content">
+                <img src="${e.target.result}" alt="Предпросмотр">
+                <div class="image-info">
+                    <p>${file.name} (${(file.size / 1024).toFixed(2)} KB)</p>
+                    <button type="button" class="remove-image-btn" onclick="clearImagePreview()">
+                        <i class="fas fa-times"></i> Удалить
+                    </button>
+                </div>
+            </div>
+        `;
+    };
+    reader.readAsDataURL(file);
+    
+    // Сохраняем файл для последующей загрузки
+    window.currentImageFile = file;
+}
 
+function clearImagePreview() {
+    const preview = document.getElementById('imagePreview');
+    const input = document.getElementById('postImage');
+    const progress = document.getElementById('uploadProgress');
+    
+    if (preview) {
+        preview.innerHTML = `
+            <p><i class="fas fa-cloud-upload-alt"></i> Перетащите изображение или нажмите для выбора</p>
+            <small class="form-hint">Поддерживаемые форматы: JPG, PNG, GIF, WebP. Максимальный размер: 10MB</small>
+        `;
+    }
+    
+    if (input) input.value = '';
+    if (progress) progress.style.display = 'none';
+    
+    delete window.currentImageFile;
+}
+
+// Обновите функцию createPost
+window.createPost = async function() {
+    const title = document.getElementById('postTitle').value.trim();
+    const content = document.getElementById('postContent').value.trim();
+    const published = document.getElementById('postPublished').checked;
+    
+    if (!title || !content) {
+        alert('Заполните заголовок и содержание');
+        return;
+    }
+    
+    try {
+        // Показываем загрузку
+        const submitBtn = document.querySelector('#createPostForm button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
+        submitBtn.disabled = true;
+        
+        // Загружаем изображение если есть
+        let imageUrl = null;
+        if (window.currentImageFile) {
+            if (typeof uploadNewsPhoto === 'function') {
+                imageUrl = await uploadNewsPhoto(window.currentImageFile);
+            } else {
+                // Альтернативный метод
+                imageUrl = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(window.currentImageFile);
+                });
+            }
+        }
+        
+        // Получаем пользователя
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) throw new Error('Пользователь не найден');
+        
+        // Создаем пост
+        const postData = {
+            title,
+            content,
+            author_id: user.id,
+            author_name: user.user_metadata?.username || user.email,
+            is_published: published,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+        
+        if (imageUrl) {
+            postData.image_url = imageUrl;
+        }
+        
+        const { error } = await _supabase
+            .from('news_posts')
+            .insert([postData]);
+        
+        if (error) throw error;
+        
+        showNotification('Новость успешно создана!', 'success');
+        window.closeCreatePostModal();
+        await window.loadNewsPosts();
+        
+        // Восстанавливаем кнопку
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+    } catch (error) {
+        console.error('Ошибка создания новости:', error);
+        alert('Ошибка создания новости: ' + error.message);
+        
+        // Восстанавливаем кнопку
+        const submitBtn = document.querySelector('#createPostForm button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = 'Опубликовать новость';
+            submitBtn.disabled = false;
+        }
+    }
+};
 /**
  * Загрузка новостей
  */
