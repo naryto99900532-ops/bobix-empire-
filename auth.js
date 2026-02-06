@@ -1,557 +1,215 @@
 /**
- * Скрипт управления авторизацией и регистрацией
- * Использует Supabase для аутентификации
+ * Удаление администратора (понижение до пользователя)
  */
-
-// Получаем элементы DOM
-const modal = document.getElementById('authModal');
-const loginBtn = document.getElementById('loginBtn');
-const toggleAuth = document.getElementById('toggleAuth');
-const authForm = document.getElementById('authForm');
-const regFields = document.querySelectorAll('.reg-field');
-const authTitle = document.getElementById('authTitle');
-const submitBtn = document.getElementById('submitBtn');
-const authError = document.getElementById('authError');
-
-// Флаги состояния
-let isSignUp = false;
-
-// Инициализация событий при загрузке DOM
-document.addEventListener('DOMContentLoaded', function() {
-    initializeAuth();
-});
-
-/**
- * Инициализация системы авторизации
- */
-function initializeAuth() {
-    // Проверяем наличие необходимых элементов
-    if (!modal || !toggleAuth || !authForm || !authTitle || !submitBtn) {
-        console.error('Не найдены необходимые элементы для авторизации');
+async function removeAdmin(adminId) {
+    if (!adminId) {
+        showNotification('ID администратора не указан', 'error');
         return;
     }
     
-    // Назначаем обработчики событий
-    setupEventListeners();
-    
-    // Проверяем текущую сессию
-    checkCurrentSession();
-}
-
-/**
- * Настройка обработчиков событий
- */
-function setupEventListeners() {
-    // Переключение между входом и регистрацией
-    toggleAuth.addEventListener('click', handleToggleAuth);
-    
-    // Обработка отправки формы
-    authForm.addEventListener('submit', handleAuthSubmit);
-    
-    // Закрытие модального окна при клике вне его
-    window.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            closeAuthModal();
-        }
-    });
-    
-    // Закрытие модального окна по Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && modal.style.display === 'flex') {
-            closeAuthModal();
-        }
-    });
-}
-
-/**
- * Переключение между режимами входа и регистрации
- */
-/**
- * Переключение между режимами входа и регистрацией
- */
-function handleToggleAuth() {
-    isSignUp = !isSignUp;
-    
-    // Обновляем текст элементов
-    authTitle.innerText = isSignUp ? "Регистрация в Bobix Corporation" : "Вход в систему";
-    submitBtn.innerText = isSignUp ? "Создать аккаунт" : "Войти";
-    toggleAuth.innerText = isSignUp ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться";
-    
-    // Показываем/скрываем дополнительные поля для регистрации
-    regFields.forEach(el => {
-        el.style.display = isSignUp ? 'block' : 'none';
-    });
-    
-    // ОБНОВЛЯЕМ: Убираем required атрибуты когда поля скрыты
-    const usernameInput = document.getElementById('username');
-    const confirmPassInput = document.getElementById('confirmPass');
-    
-    if (isSignUp) {
-        // При регистрации - делаем поля обязательными
-        if (usernameInput) {
-            usernameInput.required = true;
-            usernameInput.removeAttribute('aria-hidden');
-        }
-        if (confirmPassInput) {
-            confirmPassInput.required = true;
-            confirmPassInput.removeAttribute('aria-hidden');
-        }
-    } else {
-        // При входе - убираем required и скрываем от валидации
-        if (usernameInput) {
-            usernameInput.required = false;
-            usernameInput.setAttribute('aria-hidden', 'true');
-        }
-        if (confirmPassInput) {
-            confirmPassInput.required = false;
-            confirmPassInput.setAttribute('aria-hidden', 'true');
-        }
+    // Находим администратора
+    const admin = usersData.find(u => u.id === adminId);
+    if (!admin) {
+        showNotification('Администратор не найден', 'error');
+        return;
     }
     
-    // Очищаем сообщения об ошибках
-    clearError();
-    
-    // Сбрасываем фокус на первое поле
-    const firstInput = authForm.querySelector('input');
-    if (firstInput) {
-        firstInput.focus();
+    // Проверяем что не пытаемся удалить самого себя
+    if (adminId === currentUser?.id) {
+        showNotification('Вы не можете удалить себя', 'error');
+        return;
     }
-}
-
-/**
- * Обработка отправки формы авторизации
- * @param {Event} e - Событие отправки формы
- */
-async function handleAuthSubmit(e) {
-    e.preventDefault();
     
-    // Показываем состояние загрузки
-    setLoadingState(true);
+    // Проверяем что не пытаемся удалить владельца
+    if (admin.role === 'owner') {
+        showNotification('Нельзя удалить владельца', 'error');
+        return;
+    }
     
-    // Получаем значения полей
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const username = document.getElementById('username') ? document.getElementById('username').value.trim() : '';
-    
-    // Валидация полей
-    if (!validateForm(email, password, username)) {
-        setLoadingState(false);
+    if (!confirm(`Вы уверены, что хотите удалить администратора "${admin.username}"?`)) {
         return;
     }
     
     try {
-        if (isSignUp) {
-            // Регистрация нового пользователя
-            await handleSignUp(email, password, username);
+        console.log('Попытка удаления администратора:', adminId);
+        
+        // Обновляем роль на 'user'
+        const { data, error } = await _supabase
+            .from('profiles')
+            .update({ 
+                role: 'user',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', adminId)
+            .select(); // Добавляем select для получения обновленных данных
+        
+        if (error) {
+            console.error('Ошибка Supabase при удалении администратора:', error);
+            
+            // Проверяем конкретные ошибки
+            if (error.message.includes('permission denied')) {
+                throw new Error('У вас нет прав для удаления администраторов');
+            } else if (error.message.includes('row-level security')) {
+                throw new Error('Ошибка безопасности. Проверьте RLS политики в Supabase');
+            } else {
+                throw error;
+            }
+        }
+        
+        if (!data || data.length === 0) {
+            throw new Error('Администратор не найден или уже удален');
+        }
+        
+        console.log('Администратор успешно удален:', data[0]);
+        
+        showNotification(`Администратор "${admin.username}" удален!`, 'success');
+        
+        // Обновляем списки
+        await loadAllUsers();
+        await loadAdministrators();
+        
+    } catch (error) {
+        console.error('Ошибка удаления администратора:', error);
+        
+        let errorMessage = 'Ошибка удаления администратора';
+        if (error.message.includes('permission')) {
+            errorMessage = 'У вас нет прав для удаления администраторов';
+        } else if (error.message.includes('row-level security')) {
+            errorMessage = 'Ошибка безопасности. Проверьте RLS политики в таблице profiles';
         } else {
-            // Вход существующего пользователя
-            await handleSignIn(email, password);
-        }
-    } catch (error) {
-        // Обработка неожиданных ошибок
-        showError('Произошла непредвиденная ошибка. Попробуйте еще раз.');
-        console.error('Ошибка аутентификации:', error);
-        setLoadingState(false);
-    }
-}
-
-/**
- * Валидация формы
- * @param {string} email - Email пользователя
- * @param {string} password - Пароль
- * @param {string} username - Имя пользователя (только для регистрации)
- * @returns {boolean} - Результат валидации
- */
-function validateForm(email, password, username) {
-    // Очищаем предыдущие ошибки
-    clearError();
-    
-    // Проверка email
-    if (!email) {
-        showError('Пожалуйста, введите email');
-        return false;
-    }
-    
-    if (!isValidEmail(email)) {
-        showError('Пожалуйста, введите корректный email');
-        return false;
-    }
-    
-    // Проверка пароля
-    if (!password) {
-        showError('Пожалуйста, введите пароль');
-        return false;
-    }
-    
-    if (password.length < 6) {
-        showError('Пароль должен содержать минимум 6 символов');
-        return false;
-    }
-    
-    // Дополнительные проверки для регистрации
-    if (isSignUp) {
-        if (!username) {
-            showError('Пожалуйста, введите никнейм');
-            return false;
+            errorMessage = error.message;
         }
         
-        if (username.length < 3) {
-            showError('Никнейм должен содержать минимум 3 символа');
-            return false;
-        }
-        
-        const confirmPass = document.getElementById('confirmPass').value;
-        if (password !== confirmPass) {
-            showError('Пароли не совпадают');
-            return false;
-        }
+        showNotification(errorMessage, 'error');
     }
-    
-    return true;
 }
 
 /**
- * Проверка валидности email
- * @param {string} email - Email для проверки
- * @returns {boolean} - Результат проверки
+ * Улучшенная загрузка администраторов
  */
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-/**
- * Обработка регистрации нового пользователя
- * @param {string} email - Email пользователя
- * @param {string} password - Пароль
- * @param {string} username - Никнейм пользователя
- */
-async function handleSignUp(email, password, username) {
+async function loadAdministrators() {
     try {
-        const { data, error } = await _supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    username: username,
-                    role: 'user', // Роль по умолчанию
-                    created_at: new Date().toISOString()
-                }
-            }
-        });
+        const adminsList = document.getElementById('administratorsList');
+        if (!adminsList) return;
+        
+        adminsList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Загрузка администраторов...</p></div>';
+        
+        // Получаем всех администраторов и владельца
+        const { data: admins, error } = await _supabase
+            .from('profiles')
+            .select('*')
+            .in('role', ['admin', 'owner'])
+            .order('role', { ascending: false })
+            .order('created_at', { ascending: false });
         
         if (error) {
-            // Обработка ошибок регистрации
-            if (error.message.includes('already registered')) {
-                showError('Пользователь с таким email уже зарегистрирован');
-            } else if (error.message.includes('password')) {
-                showError('Пароль слишком слабый. Используйте более сложный пароль');
-            } else {
-                showError(error.message);
-            }
-            setLoadingState(false);
+            console.error('Ошибка Supabase при загрузке администраторов:', error);
+            
+            // Пробуем альтернативный запрос
+            const { data: allProfiles, error: allError } = await _supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (allError) throw allError;
+            
+            // Фильтруем локально
+            const filteredAdmins = allProfiles.filter(p => p.role === 'admin' || p.role === 'owner');
+            renderAdministrators(filteredAdmins);
+            updateAdminStats(filteredAdmins);
             return;
         }
         
-        // Регистрация успешна
-        showSuccess('Аккаунт успешно создан! Проверьте вашу почту для подтверждения.');
-        
-        // Переключаем на форму входа через 3 секунды
-        setTimeout(() => {
-            if (isSignUp) {
-                handleToggleAuth();
-            }
-            setLoadingState(false);
-        }, 3000);
+        renderAdministrators(admins || []);
+        updateAdminStats(admins || []);
         
     } catch (error) {
-        showError('Ошибка при регистрации. Попробуйте еще раз.');
-        setLoadingState(false);
+        console.error('Ошибка загрузки администраторов:', error);
+        document.getElementById('administratorsList').innerHTML = 
+            `<div class="error-message">
+                <p>Ошибка загрузки администраторов: ${error.message}</p>
+                <button class="admin-btn" onclick="loadAdministrators()">Повторить попытку</button>
+            </div>`;
     }
 }
 
 /**
- * Обработка входа пользователя
- * @param {string} email - Email пользователя
- * @param {string} password - Пароль
+ * Обновление статистики администраторов
  */
-async function handleSignIn(email, password) {
-    try {
-        setLoadingState(true);
-        
-        // Сначала очищаем возможные остатки старой сессии
-        await clearAuthDataManually();
-        
-        // Задержка для гарантии очистки
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        const { data, error } = await _supabase.auth.signInWithPassword({
-            email,
-            password
-        });
-        
-        if (error) {
-            // Обработка ошибок входа
-            let errorMessage = 'Ошибка при входе';
-            
-            if (error.message.includes('Invalid login credentials')) {
-                errorMessage = 'Неверный email или пароль';
-            } else if (error.message.includes('Email not confirmed')) {
-                errorMessage = 'Пожалуйста, подтвердите ваш email перед входом';
-            } else if (error.message.includes('rate limit')) {
-                errorMessage = 'Слишком много попыток. Подождите 1 минуту';
-            } else {
-                errorMessage = error.message;
-            }
-            
-            showError(errorMessage);
-            setLoadingState(false);
-            return;
-        }
-        
-        // Вход успешен
-        showSuccess('Вход выполнен успешно!');
-        
-        // Сохраняем флаг успешного входа в sessionStorage
-        sessionStorage.setItem('login_success', 'true');
-        
-        // Перенаправляем на панель управления с параметром для избежания кэширования
-        setTimeout(() => {
-            window.location.href = 'management.html?login=' + Date.now();
-        }, 1000);
-        
-    } catch (error) {
-        console.error('Неожиданная ошибка при входе:', error);
-        showError('Произошла непредвиденная ошибка. Попробуйте еще раз.');
-        setLoadingState(false);
+function updateAdminStats(admins) {
+    if (!admins) {
+        console.warn('Нет данных для статистики');
+        return;
     }
-}
-/**
- * Проверка текущей сессии пользователя
- */
-async function checkCurrentSession() {
-    try {
-        const { data: { user } } = await _supabase.auth.getUser();
-        
-        if (user) {
-            // Пользователь уже авторизован
-            updateUIForLoggedInUser(user);
-        }
-    } catch (error) {
-        console.error('Ошибка при проверке сессии:', error);
-    }
-}
-
-/**
- * Обновление UI для авторизованного пользователя
- * @param {object} user - Данные пользователя
- */
-function updateUIForLoggedInUser(user) {
-    // Обновляем кнопки входа
-    const loginButtons = document.querySelectorAll('#loginBtn, #mainLoginBtn');
     
-    loginButtons.forEach(button => {
-        if (button) {
-            button.innerHTML = '<i class="fas fa-tachometer-alt"></i> ПАНЕЛЬ УПРАВЛЕНИЯ';
-            button.onclick = () => window.location.href = 'management.html';
-        }
-    });
-}
-
-/**
- * Открытие модального окна авторизации
- */
-function openAuthModal() {
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        
-        // Сбрасываем форму
-        authForm.reset();
-        clearError();
-        
-        // Устанавливаем фокус на первое поле
-        const firstInput = authForm.querySelector('input');
-        if (firstInput) {
-            setTimeout(() => firstInput.focus(), 100);
-        }
-    }
-}
-
-/**
- * Закрытие модального окна авторизации
- */
-function closeAuthModal() {
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        
-        // Сбрасываем форму
-        authForm.reset();
-        clearError();
-        
-        // Возвращаемся к режиму входа
-        if (isSignUp) {
-            handleToggleAuth();
-        }
-    }
-}
-
-/**
- * Показать сообщение об ошибке
- * @param {string} message - Текст ошибки
- */
-function showError(message) {
-    if (authError) {
-        authError.textContent = message;
-        authError.style.display = 'block';
-        
-        // Автоматически скрыть ошибку через 5 секунд
-        setTimeout(() => {
-            clearError();
-        }, 5000);
-    } else {
-        alert(message);
-    }
-}
-
-/**
- * Показать сообщение об успехе
- * @param {string} message - Текст сообщения
- */
-function showSuccess(message) {
-    if (authError) {
-        authError.textContent = message;
-        authError.style.color = '#00ff00';
-        authError.style.borderColor = '#00ff00';
-        authError.style.backgroundColor = 'rgba(0, 255, 0, 0.1)';
-        authError.style.display = 'block';
-    }
-}
-
-/**
- * Очистить сообщения об ошибках/успехе
- */
-function clearError() {
-    if (authError) {
-        authError.textContent = '';
-        authError.style.display = 'none';
-        authError.style.color = '';
-        authError.style.borderColor = '';
-        authError.style.backgroundColor = '';
-    }
-}
-
-/**
- * Установить состояние загрузки
- * @param {boolean} isLoading - Флаг загрузки
- */
-function setLoadingState(isLoading) {
-    if (submitBtn) {
-        submitBtn.disabled = isLoading;
-        submitBtn.innerHTML = isLoading 
-            ? '<i class="fas fa-spinner fa-spin"></i> Загрузка...' 
-            : (isSignUp ? "Создать аккаунт" : "Войти");
-    }
-}
-
-/**
- * Выход из системы
- */
-async function logout() {
-    try {
-        // Показываем состояние загрузки
-        const logoutBtns = document.querySelectorAll('.logout-btn');
-        logoutBtns.forEach(btn => {
-            if (btn) {
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Выход...';
-                btn.disabled = true;
-                
-                // Восстанавливаем через 3 секунды если что-то пошло не так
-                setTimeout(() => {
-                    btn.innerHTML = originalHTML;
-                    btn.disabled = false;
-                }, 3000);
-            }
-        });
-        
-        // Полный выход из Supabase
-        const { error } = await _supabase.auth.signOut();
-        
-        if (error) {
-            console.error('Ошибка при выходе:', error);
-            // Пробуем альтернативный метод
-            await clearAuthDataManually();
-        }
-        
-        // Очищаем все локальные данные
-        await clearAllAuthData();
-        
-        // Принудительное перенаправление с параметром для избежания кэширования
-        setTimeout(() => {
-            window.location.href = 'index.html?logout=' + Date.now() + '&nocache=' + Math.random();
-        }, 500);
-        
-    } catch (error) {
-        console.error('Критическая ошибка при выходе:', error);
-        // Все равно пытаемся перенаправить
-        window.location.href = 'index.html?forceLogout=true';
-    }
-}
-
-/**
- * Очистка всех данных аутентификации вручную
- */
-async function clearAuthDataManually() {
-    try {
-        // Очищаем localStorage
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.includes('supabase') || key.includes('auth') || key.includes('sb-')) {
-                keysToRemove.push(key);
-            }
-        }
-        
-        keysToRemove.forEach(key => {
-            localStorage.removeItem(key);
-        });
-        
-        // Очищаем sessionStorage
-        sessionStorage.clear();
-        
-        // Очищаем cookies
-        document.cookie.split(";").forEach(function(c) {
-            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
-        
-    } catch (error) {
-        console.error('Ошибка при ручной очистке данных:', error);
-    }
-}
-
-/**
- * Полная очистка всех данных аутентификации
- */
-async function clearAllAuthData() {
-    // Очищаем localStorage
-    localStorage.clear();
+    // Подсчитываем администраторов (без владельца)
+    const adminCount = admins.filter(a => a.role === 'admin').length;
+    const ownerCount = admins.filter(a => a.role === 'owner').length;
+    const totalCount = admins.length;
     
-    // Очищаем sessionStorage
-    sessionStorage.clear();
+    console.log('Статистика администраторов:', { adminCount, ownerCount, totalCount });
     
-    // Сбрасываем состояние Supabase
-    try {
-        // Отправляем запрос на сервер для полного выхода
-        await fetch('https://tstyjtgcisdelkkltyjo.supabase.co/auth/v1/logout', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${_supabase.auth.session()?.access_token}`,
-                'apikey': SUPABASE_KEY
-            }
-        });
-    } catch (error) {
-        // Игнорируем ошибки при logout запросе
+    // Обновляем элементы если они существуют
+    const totalAdminsElement = document.getElementById('totalAdminsCount');
+    const totalUsersElement = document.getElementById('totalUsersCount');
+    const systemUptimeElement = document.getElementById('systemUptime');
+    
+    if (totalAdminsElement) {
+        totalAdminsElement.textContent = adminCount;
+        totalAdminsElement.style.color = adminCount > 0 ? 'var(--accent)' : '#ff4444';
+    }
+    
+    if (totalUsersElement) {
+        totalUsersElement.textContent = totalCount;
+    }
+    
+    if (systemUptimeElement) {
+        // Простая проверка стабильности системы
+        const stability = totalCount > 0 ? '100%' : '0%';
+        systemUptimeElement.textContent = stability;
+        systemUptimeElement.style.color = totalCount > 0 ? '#2ecc71' : '#ff4444';
+    }
+    
+    // Также обновляем статистику в админ панели
+    updateAdminPanelStats(admins);
+}
+
+/**
+ * Обновление статистики в админ панели
+ */
+function updateAdminPanelStats(admins) {
+    const adminPanelStats = document.querySelector('#admin-panel .admin-stats');
+    if (adminPanelStats) {
+        const adminCount = admins.filter(a => a.role === 'admin').length;
+        
+        // Обновляем или создаем элементы статистики
+        let statsHTML = `
+            <h4><i class="fas fa-chart-pie"></i> Статистика системы</h4>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-user-tie"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="panelAdminCount">${adminCount}</div>
+                        <div class="stat-label">Администраторов</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="panelTotalUsers">${admins.length}</div>
+                        <div class="stat-label">Всего пользователей</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" style="color: #2ecc71;">100%</div>
+                        <div class="stat-label">Стабильность системы</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        adminPanelStats.innerHTML = statsHTML;
     }
 }
