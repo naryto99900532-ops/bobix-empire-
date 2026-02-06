@@ -461,57 +461,61 @@ async function handleCreatePost(e) {
  */
 async function uploadImage(file) {
     try {
-        // Проверяем что storage bucket существует
-        const { data: buckets, error: bucketsError } = await _supabase.storage.listBuckets();
-        
-        if (bucketsError) {
-            console.error('Ошибка получения buckets:', bucketsError);
-            throw new Error('Ошибка загрузки изображения');
-        }
-        
-        // Ищем bucket для новостей
-        let newsBucket = buckets.find(b => b.name === 'news-images');
-        
-        // Если bucket не существует, используем fallback
-        if (!newsBucket) {
-            console.warn('Bucket news-images не найден, используем публичный URL');
-            return URL.createObjectURL(file); // Возвращаем локальный URL как fallback
-        }
+        console.log('Начало загрузки изображения:', file.name);
         
         // Создаем уникальное имя файла
         const timestamp = Date.now();
         const randomString = Math.random().toString(36).substring(2, 15);
-        const fileExtension = file.name.split('.').pop();
+        const fileExtension = file.name.split('.').pop().toLowerCase();
         const fileName = `news_${timestamp}_${randomString}.${fileExtension}`;
         const filePath = `news-images/${fileName}`;
         
-        // Загружаем файл
-        const { data: uploadData, error: uploadError } = await _supabase.storage
-            .from('news-images')
+        console.log('Пытаюсь загрузить в:', filePath);
+        
+        // Пробуем загрузить в Supabase Storage
+        const { data, error } = await _supabase.storage
+            .from('news-images') // Имя бакета ДОЛЖНО совпадать
             .upload(filePath, file, {
                 cacheControl: '3600',
                 upsert: false
             });
         
-        if (uploadError) {
-            console.error('Ошибка загрузки изображения:', uploadError);
-            throw new Error('Не удалось загрузить изображение');
+        if (error) {
+            console.error('Ошибка загрузки в Supabase Storage:', error);
+            
+            // Если бакет не существует или нет доступа, используем альтернативный метод
+            if (error.message.includes('bucket') || error.message.includes('not found')) {
+                console.warn('Бакет не найден, создаем временную ссылку');
+                return URL.createObjectURL(file);
+            }
+            
+            throw error;
         }
+        
+        console.log('Изображение загружено, получаем публичный URL...');
         
         // Получаем публичный URL
         const { data: { publicUrl } } = _supabase.storage
             .from('news-images')
             .getPublicUrl(filePath);
         
+        console.log('Публичный URL получен:', publicUrl);
         return publicUrl;
         
     } catch (error) {
-        console.error('Ошибка загрузки изображения:', error);
-        // Возвращаем локальный URL как fallback
-        return URL.createObjectURL(file);
+        console.error('Критическая ошибка загрузки изображения:', error);
+        
+        // Fallback: создаем временную ссылку
+        try {
+            const tempUrl = URL.createObjectURL(file);
+            console.log('Использую временную ссылку:', tempUrl);
+            return tempUrl;
+        } catch (fallbackError) {
+            console.error('Не удалось создать временную ссылку:', fallbackError);
+            return null;
+        }
     }
 }
-
 /**
  * Открытие модального окна редактирования поста
  */
