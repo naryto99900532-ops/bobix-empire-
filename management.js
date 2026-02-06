@@ -203,22 +203,67 @@ function setupNavigation() {
  * @param {string} sectionId - ID секции
  */
 async function loadSectionData(sectionId) {
-    switch (sectionId) {
-        case 'clan-players':
-            await loadPlayers();
-            break;
-        case 'top-clan':
-            await loadTopPlayers();
-            break;
-        case 'admin-panel':
-            await loadAdminStats();
-            break;
-        case 'owner-panel':
-            await loadAllUsers();
-            break;
+    console.log('Загрузка данных для секции:', sectionId);
+    
+    try {
+        switch (sectionId) {
+            case 'clan-players':
+                if (typeof loadPlayers === 'function') {
+                    await loadPlayers();
+                } else {
+                    console.error('Функция loadPlayers не найдена');
+                    showNotification('Ошибка загрузки игроков', 'error');
+                }
+                break;
+                
+            case 'top-clan':
+                if (typeof loadTopPlayers === 'function') {
+                    await loadTopPlayers();
+                } else {
+                    console.error('Функция loadTopPlayers не найдена');
+                    showNotification('Ошибка загрузки топа игроков', 'error');
+                }
+                break;
+                
+            case 'news':
+                if (typeof window.loadNewsPosts === 'function') {
+                    await window.loadNewsPosts();
+                } else if (typeof loadNewsPosts === 'function') {
+                    await loadNewsPosts();
+                } else {
+                    console.error('Функция loadNewsPosts не найдена');
+                    document.getElementById('newsPosts').innerHTML = `
+                        <div class="error-message">
+                            <p>Функция загрузки новостей не доступна</p>
+                            <button class="admin-btn" onclick="location.reload()">Обновить страницу</button>
+                        </div>
+                    `;
+                }
+                break;
+                
+            case 'admin-panel':
+                if (typeof loadAdminPanelData === 'function') {
+                    await loadAdminPanelData();
+                }
+                break;
+                
+            case 'owner-panel':
+                if (typeof loadOwnerPanelData === 'function') {
+                    await loadOwnerPanelData();
+                }
+                break;
+                
+            case 'administrators':
+                if (typeof loadAdministrators === 'function') {
+                    await loadAdministrators();
+                }
+                break;
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки данных секции:', error);
+        showNotification(`Ошибка загрузки: ${error.message}`, 'error');
     }
 }
-
 /**
  * Настройка обработчиков событий
  */
