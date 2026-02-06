@@ -218,9 +218,9 @@
                 <p>Публикуйте новости и объявления для всего клана</p>
             </div>
             <div class="admin-actions">
-                <button class="admin-btn primary" onclick="openCreatePostModal()" id="createNewsBtn">
-                    <i class="fas fa-plus-circle"></i> Выложить новость
-                </button>
+                <button class="admin-btn primary" onclick="window.openCreatePostModal && window.openCreatePostModal()" id="createNewsBtn">
+    <i class="fas fa-plus-circle"></i> Выложить новость
+</button>
                 <button class="admin-btn" onclick="loadNewsPosts()">
                     <i class="fas fa-sync-alt"></i> Обновить
                 </button>
