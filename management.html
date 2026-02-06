@@ -638,17 +638,22 @@
         </form>
     </div>
 </div>
-    <!-- Сначала базовые скрипты -->
+    <!-- 1. Supabase и база -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="db.js"></script>
+
+<!-- 2. Базовые функции -->
 <script src="session-fix.js"></script>
 
-<!-- Затем скрипты функций -->
-<script src="news-functions.js"></script>
+<!-- 3. Функции модулей -->
+<script src="simple-news.js"></script>
 <script src="admin-functions.js"></script>
 
-<!-- И только потом management.js -->
+<!-- 4. Основной скрипт управления -->
 <script src="management.js"></script>
+
+<!-- 5. Загрузчик для инициализации -->
+<script src="loader.js"></script>
 
 <!-- Инициализация -->
 <script>
@@ -693,22 +698,7 @@
             initializeManagementPage();
         });
     </script>
-    <!-- 1. Supabase и база -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="db.js"></script>
 
-<!-- 2. Базовые функции -->
-<script src="session-fix.js"></script>
-
-<!-- 3. Функции модулей -->
-<script src="simple-news.js"></script>
-<script src="admin-functions.js"></script>
-
-<!-- 4. Основной скрипт управления -->
-<script src="management.js"></script>
-
-<!-- 5. Загрузчик для инициализации -->
-<script src="loader.js"></script>
 
 <!-- 6. Финальная инициализация -->
 <script>
