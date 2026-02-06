@@ -1232,6 +1232,29 @@ async function loadSectionData(sectionId) {
             break;
     }
 }
+// Обновляем загрузку данных для секций
+async function loadSectionData(sectionId) {
+    switch (sectionId) {
+        case 'clan-players':
+            await loadPlayers();
+            break;
+        case 'top-clan':
+            await loadTopPlayers();
+            break;
+        case 'news':
+            await loadNewsPosts();
+            break;
+        case 'admin-panel':
+            await loadAdminPanelData();
+            break;
+        case 'owner-panel':
+            await loadOwnerPanelData();
+            break;
+        case 'administrators':
+            await loadAdministrators();
+            break;
+    }
+}
 
 // Функция загрузки данных для админ панели
 async function loadAdminPanelData() {
@@ -1246,3 +1269,4 @@ async function loadOwnerPanelData() {
 
 // Переопределяем функцию рендера игроков для использования новой
 window.renderPlayersList = updatePlayersRender;
+
