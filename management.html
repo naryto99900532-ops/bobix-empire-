@@ -648,7 +648,28 @@
 
 <!-- В management.html после db.js -->
 <script src="session-fix.js"></script>
-
+<script>
+    // Проверка что функции существуют
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Проверка функций:');
+        console.log('openCreatePostModal:', typeof openCreatePostModal);
+        console.log('closeCreatePostModal:', typeof closeCreatePostModal);
+        console.log('loadNewsPosts:', typeof loadNewsPosts);
+        
+        // Добавляем обработчик для кнопки
+        const createBtn = document.getElementById('createNewsBtn');
+        if (createBtn) {
+            createBtn.onclick = function() {
+                if (typeof openCreatePostModal === 'function') {
+                    openCreatePostModal();
+                } else {
+                    console.error('Функция openCreatePostModal не найдена!');
+                    showNotification('Ошибка: функция не загружена', 'error');
+                }
+            };
+        }
+    });
+</script>
     <script>
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
