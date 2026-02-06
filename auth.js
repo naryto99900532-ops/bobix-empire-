@@ -260,6 +260,14 @@ async function handleSignUp(email, password, username) {
  */
 async function handleSignIn(email, password) {
     try {
+        setLoadingState(true);
+        
+        // Сначала очищаем возможные остатки старой сессии
+        await clearAuthDataManually();
+        
+        // Задержка для гарантии очистки
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         const { data, error } = await _supabase.auth.signInWithPassword({
             email,
             password
@@ -267,13 +275,19 @@ async function handleSignIn(email, password) {
         
         if (error) {
             // Обработка ошибок входа
+            let errorMessage = 'Ошибка при входе';
+            
             if (error.message.includes('Invalid login credentials')) {
-                showError('Неверный email или пароль');
+                errorMessage = 'Неверный email или пароль';
             } else if (error.message.includes('Email not confirmed')) {
-                showError('Пожалуйста, подтвердите ваш email перед входом');
+                errorMessage = 'Пожалуйста, подтвердите ваш email перед входом';
+            } else if (error.message.includes('rate limit')) {
+                errorMessage = 'Слишком много попыток. Подождите 1 минуту';
             } else {
-                showError(error.message);
+                errorMessage = error.message;
             }
+            
+            showError(errorMessage);
             setLoadingState(false);
             return;
         }
@@ -281,17 +295,20 @@ async function handleSignIn(email, password) {
         // Вход успешен
         showSuccess('Вход выполнен успешно!');
         
-        // Перенаправляем на панель управления
+        // Сохраняем флаг успешного входа в sessionStorage
+        sessionStorage.setItem('login_success', 'true');
+        
+        // Перенаправляем на панель управления с параметром для избежания кэширования
         setTimeout(() => {
-            window.location.href = 'management.html';
+            window.location.href = 'management.html?login=' + Date.now();
         }, 1000);
         
     } catch (error) {
-        showError('Ошибка при входе. Попробуйте еще раз.');
+        console.error('Неожиданная ошибка при входе:', error);
+        showError('Произошла непредвиденная ошибка. Попробуйте еще раз.');
         setLoadingState(false);
     }
 }
-
 /**
  * Проверка текущей сессии пользователя
  */
@@ -427,34 +444,97 @@ function setLoadingState(isLoading) {
 async function logout() {
     try {
         // Показываем состояние загрузки
-        const logoutBtn = document.querySelector('.logout-btn');
-        if (logoutBtn) {
-            logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Выход...';
-            logoutBtn.disabled = true;
+        const logoutBtns = document.querySelectorAll('.logout-btn');
+        logoutBtns.forEach(btn => {
+            if (btn) {
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Выход...';
+                btn.disabled = true;
+                
+                // Восстанавливаем через 3 секунды если что-то пошло не так
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                }, 3000);
+            }
+        });
+        
+        // Полный выход из Supabase
+        const { error } = await _supabase.auth.signOut();
+        
+        if (error) {
+            console.error('Ошибка при выходе:', error);
+            // Пробуем альтернативный метод
+            await clearAuthDataManually();
         }
         
-        // Очищаем все данные аутентификации
-        await _supabase.auth.signOut();
+        // Очищаем все локальные данные
+        await clearAllAuthData();
         
-        // Очищаем localStorage
-        localStorage.removeItem('supabase.auth.token');
-        localStorage.removeItem('sb-tstyjtgcisdelkkltyjo-auth-token');
-        
-        // Очищаем сессионные данные
-        sessionStorage.clear();
-        
-        // Перенаправляем на главную страницу с принудительным обновлением
+        // Принудительное перенаправление с параметром для избежания кэширования
         setTimeout(() => {
-            window.location.href = 'index.html?logout=' + Date.now();
+            window.location.href = 'index.html?logout=' + Date.now() + '&nocache=' + Math.random();
         }, 500);
         
     } catch (error) {
-        console.error('Ошибка при выходе:', error);
-        showNotification('Ошибка при выходе из системы. Попробуйте очистить кэш браузера.', 'error');
+        console.error('Критическая ошибка при выходе:', error);
+        // Все равно пытаемся перенаправить
+        window.location.href = 'index.html?forceLogout=true';
+    }
+}
+
+/**
+ * Очистка всех данных аутентификации вручную
+ */
+async function clearAuthDataManually() {
+    try {
+        // Очищаем localStorage
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.includes('supabase') || key.includes('auth') || key.includes('sb-')) {
+                keysToRemove.push(key);
+            }
+        }
         
-        // Все равно перенаправляем
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 1000);
+        keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+        });
+        
+        // Очищаем sessionStorage
+        sessionStorage.clear();
+        
+        // Очищаем cookies
+        document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+        
+    } catch (error) {
+        console.error('Ошибка при ручной очистке данных:', error);
+    }
+}
+
+/**
+ * Полная очистка всех данных аутентификации
+ */
+async function clearAllAuthData() {
+    // Очищаем localStorage
+    localStorage.clear();
+    
+    // Очищаем sessionStorage
+    sessionStorage.clear();
+    
+    // Сбрасываем состояние Supabase
+    try {
+        // Отправляем запрос на сервер для полного выхода
+        await fetch('https://tstyjtgcisdelkkltyjo.supabase.co/auth/v1/logout', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${_supabase.auth.session()?.access_token}`,
+                'apikey': SUPABASE_KEY
+            }
+        });
+    } catch (error) {
+        // Игнорируем ошибки при logout запросе
     }
 }
