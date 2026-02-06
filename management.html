@@ -543,7 +543,54 @@
         </div>
     </div>
 </div>
-
+<!-- Модальное окно создания/редактирования поста -->
+<div id="createPostModal" class="modal">
+    <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+        <span class="close-modal" onclick="closeCreatePostModal()">&times;</span>
+        <h2><i class="fas fa-edit"></i> ${currentEditingPostId ? 'Редактировать пост' : 'Создать новый пост'}</h2>
+        
+        <form id="createPostForm">
+            <div class="form-group">
+                <label for="postTitle"><i class="fas fa-heading"></i> Заголовок новости</label>
+                <input type="text" id="postTitle" class="edit-input" placeholder="Введите заголовок новости" required>
+                <small class="form-hint">Придумайте яркий и информативный заголовок</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="postContent"><i class="fas fa-file-alt"></i> Содержание новости</label>
+                <textarea id="postContent" class="edit-input" placeholder="Напишите подробное содержание новости..." rows="8" required></textarea>
+                <small class="form-hint">Вы можете использовать Markdown-разметку и вставлять ссылки</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="postImage"><i class="fas fa-image"></i> Изображение (опционально)</label>
+                <input type="file" id="postImage" class="edit-input" accept="image/*" style="display: none;" onchange="previewImage(event)">
+                
+                <div class="image-upload-area" id="imagePreview" onclick="document.getElementById('postImage').click()">
+                    <p><i class="fas fa-cloud-upload-alt"></i> Перетащите изображение или нажмите для выбора</p>
+                    <small class="form-hint">Поддерживаемые форматы: JPG, PNG, GIF. Максимальный размер: 5MB</small>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="postPublished" checked>
+                    <span><i class="fas fa-globe"></i> Опубликовать сразу</span>
+                </label>
+                <small class="form-hint">Если не отмечено, пост сохранится как черновик</small>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="admin-btn primary">
+                    <i class="fas fa-paper-plane"></i> ${currentEditingPostId ? 'Сохранить изменения' : 'Опубликовать новость'}
+                </button>
+                <button type="button" class="admin-btn" onclick="closeCreatePostModal()">
+                    <i class="fas fa-times"></i> Отмена
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="db.js"></script>
     <script src="management.js"></script>
