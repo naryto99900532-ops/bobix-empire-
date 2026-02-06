@@ -1,3 +1,16 @@
+// Проверяем что функция существует в глобальной области
+if (typeof window !== 'undefined') {
+    // Создаем функцию если ее нет
+    if (!window.openCreatePostModal) {
+        window.openCreatePostModal = openCreatePostModal;
+    }
+    if (!window.closeCreatePostModal) {
+        window.closeCreatePostModal = closeCreatePostModal;
+    }
+    if (!window.loadNewsPosts) {
+        window.loadNewsPosts = loadNewsPosts;
+    }
+}
 /**
  * Функции для управления новостями
  */
