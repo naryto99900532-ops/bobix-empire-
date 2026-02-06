@@ -109,7 +109,79 @@ function closeAddAdminModal() {
     document.getElementById('addAdminModal').style.display = 'none';
     selectedUserId = null;
 }
+/**
+ * Загрузка данных для панели владельца
+ */
+async function loadOwnerPanelData() {
+    try {
+        console.log('Загрузка данных для Owner Panel...');
+        
+        // Загружаем администраторов
+        await loadAdministrators();
+        
+        // Загружаем всех пользователей для статистики
+        const { data: allUsers, error } = await _supabase
+            .from('profiles')
+            .select('id, role, created_at')
+            .order('created_at', { ascending: false });
+        
+        if (!error && allUsers) {
+            updateOwnerPanelStats(allUsers);
+        }
+        
+    } catch (error) {
+        console.error('Ошибка загрузки данных Owner Panel:', error);
+    }
+}
 
+/**
+ * Обновление статистики Owner Panel
+ */
+function updateOwnerPanelStats(users) {
+    if (!users || !Array.isArray(users)) return;
+    
+    // Подсчет статистики
+    const totalUsers = users.length;
+    const adminCount = users.filter(u => u.role === 'admin').length;
+    const ownerCount = users.filter(u => u.role === 'owner').length;
+    const regularUsers = users.filter(u => u.role === 'user').length;
+    
+    // Пользователи за последние 7 дней
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const newUsers = users.filter(u => new Date(u.created_at) > weekAgo).length;
+    
+    // Обновляем элементы
+    const elements = {
+        'totalAdminsCount': adminCount,
+        'totalUsersCount': totalUsers,
+        'systemUptime': '100%'
+    };
+    
+    Object.entries(elements).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+            
+            // Добавляем анимацию при изменении
+            if (parseInt(element.textContent) !== parseInt(value)) {
+                element.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 300);
+            }
+        }
+    });
+    
+    // Дополнительная статистика
+    console.log('Статистика Owner Panel:', {
+        totalUsers,
+        admins: adminCount,
+        owners: ownerCount,
+        regularUsers,
+        newUsers
+    });
+}
 /**
  * Загрузка пользователей для модального окна добавления администратора
  */
