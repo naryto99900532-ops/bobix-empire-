@@ -1551,3 +1551,59 @@ input[aria-hidden="true"] {
     position: absolute !important;
     width: 0 !important;
 }
+/* Стили для предпросмотра новостей на главной */
+.news-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.news-preview-card {
+    cursor: pointer;
+    transition: all 0.3s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-preview-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+    box-shadow: 0 10px 20px rgba(255, 215, 0, 0.1);
+}
+
+.news-date {
+    color: var(--accent);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.news-preview-card h3 {
+    color: var(--text);
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    min-height: 3.5em;
+}
+
+.news-preview-card p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+    flex-grow: 1;
+    margin-bottom: 15px;
+}
+
+.news-author {
+    color: var(--accent);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 215, 0, 0.1);
+}
