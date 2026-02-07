@@ -715,23 +715,47 @@
         if (!allGood) {
             console.warn('Не все функции загружены. Попытка восстановления...');
             
-            // Пробуем загрузить простые версии
+            // Создаем заглушки для отсутствующих функций
             if (typeof window.openCreatePostModal !== 'function') {
                 window.openCreatePostModal = function() {
-                    const modal = document.getElementById('createPostModal');
-                    if (modal) {
-                        modal.style.display = 'flex';
-                    } else {
-                        alert('Для создания новостей обновите страницу (Ctrl+F5)');
+                    console.log('Используется fallback функция openCreatePostModal');
+                    
+                    // Пробуем найти модальное окно
+                    const modalIds = ['createPostModal', 'newsEditorModal'];
+                    
+                    for (const modalId of modalIds) {
+                        const modal = document.getElementById(modalId);
+                        if (modal) {
+                            modal.style.display = 'flex';
+                            console.log('Показано модальное окно:', modalId);
+                            
+                            // Фокусируемся на заголовке
+                            setTimeout(() => {
+                                const titleInput = modal.querySelector('#postTitle, #newsTitle');
+                                if (titleInput) titleInput.focus();
+                            }, 100);
+                            return;
+                        }
                     }
+                    
+                    alert('Для создания новостей обновите страницу (Ctrl+F5) или проверьте консоль');
                 };
+                console.log('✅ Создана fallback функция openCreatePostModal');
             }
             
             if (typeof window.loadNewsPosts !== 'function') {
                 window.loadNewsPosts = function() {
+                    console.log('Fallback: перезагрузка страницы');
                     location.reload();
                 };
+                console.log('✅ Создана fallback функция loadNewsPosts');
             }
+        }
+        
+        // Инициализируем новости
+        if (typeof window.initializeNews === 'function') {
+            console.log('Инициализация новостей...');
+            setTimeout(() => window.initializeNews(), 500);
         }
         
         // Инициализируем если есть функция
