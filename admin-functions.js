@@ -80,7 +80,66 @@ document.getElementById('addPlayerForm')?.addEventListener('submit', async funct
         showNotification(`Ошибка добавления игрока: ${error.message}`, 'error');
     }
 });
+/**
+ * Функции для панели администратора и владельца
+ */
 
+let selectedUserId = null;
+
+/**
+ * Проверка прав доступа с использованием глобальной системы ролей
+ */
+function checkAdminPermissions() {
+    if (!window.currentUserRole) {
+        console.warn('Роль пользователя не определена');
+        return false;
+    }
+    
+    return window.currentUserRole === 'admin' || window.currentUserRole === 'owner';
+}
+
+function checkOwnerPermissions() {
+    if (!window.currentUserRole) {
+        console.warn('Роль пользователя не определена');
+        return false;
+    }
+    
+    return window.currentUserRole === 'owner';
+}
+
+/**
+ * Открытие модального окна добавления игрока
+ */
+function openAddPlayerModal() {
+    // Проверяем права с использованием новой системы
+    if (!checkAdminPermissions()) {
+        showNotification('У вас нет прав для добавления игроков', 'error');
+        return;
+    }
+    
+    console.log('Открытие модального окна добавления игрока, роль:', window.currentUserRole);
+    
+    document.getElementById('addPlayerModal').style.display = 'flex';
+    document.getElementById('playerPseudonym').focus();
+}
+
+/**
+ * Открытие модального окна добавления администратора
+ */
+function openAddAdminModal() {
+    if (!checkOwnerPermissions()) {
+        showNotification('Только владелец может добавлять администраторов', 'error');
+        return;
+    }
+    
+    console.log('Открытие модального окна добавления администратора, роль:', window.currentUserRole);
+    
+    document.getElementById('addAdminModal').style.display = 'flex';
+    loadUsersForAdminModal();
+}
+
+// Остальной код admin-functions.js остается без изменений...
+// [Вся остальная часть файла admin-functions.js остается ТОЧНО такой же, как в предоставленном вами коде]
 /**
  * Проверка формата Discord
  */
