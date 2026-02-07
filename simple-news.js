@@ -1,16 +1,23 @@
 /**
  * Простые функции для управления новостями
+ * Улучшенная версия с исправлением проблемы модального окна
  */
 
 // Глобальные переменные
 window.newsPosts = [];
 window.currentUserRole = 'user';
+window.newsInitialized = false;
 
 /**
  * Инициализация новостей
  */
 window.initializeNews = async function() {
     console.log('Инициализация новостей...');
+    
+    if (window.newsInitialized) {
+        console.log('Новости уже инициализированы');
+        return;
+    }
     
     try {
         // Проверяем авторизацию
@@ -25,16 +32,68 @@ window.initializeNews = async function() {
             
             if (profile) {
                 window.currentUserRole = profile.role;
+                console.log('Роль пользователя определена:', window.currentUserRole);
             }
         }
         
         // Загружаем новости
         await window.loadNewsPosts();
         
+        window.newsInitialized = true;
+        console.log('Новости успешно инициализированы');
+        
+        // Настраиваем обработчик для кнопки создания новости
+        setupCreateNewsButton();
+        
     } catch (error) {
         console.error('Ошибка инициализации новостей:', error);
+        showNotification('Ошибка загрузки новостей', 'error');
     }
 };
+
+/**
+ * Настройка кнопки создания новости
+ */
+function setupCreateNewsButton() {
+    const createBtn = document.getElementById('createNewsBtn');
+    if (createBtn) {
+        console.log('Настройка обработчика для кнопки создания новости');
+        
+        // Удаляем старый обработчик, если есть
+        createBtn.onclick = null;
+        
+        // Добавляем новый обработчик
+        createBtn.onclick = function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('Кнопка создания новости нажата');
+            
+            // Пробуем все доступные функции создания новости
+            if (typeof window.openCreatePostModal === 'function') {
+                console.log('Используем openCreatePostModal');
+                window.openCreatePostModal();
+            } else if (typeof window.openNewsEditor === 'function') {
+                console.log('Используем openNewsEditor');
+                window.openNewsEditor();
+            } else if (typeof openNewsEditor === 'function') {
+                console.log('Используем openNewsEditor (локальная)');
+                openNewsEditor();
+            } else {
+                console.error('Функция создания новости не найдена!');
+                alert('Функция создания новости не доступна. Пожалуйста, обновите страницу.');
+            }
+        };
+        
+        // Показываем кнопку для админов
+        if (window.currentUserRole === 'admin' || window.currentUserRole === 'owner') {
+            createBtn.style.display = 'inline-block';
+        }
+    } else {
+        console.warn('Кнопка createNewsBtn не найдена');
+    }
+}
+
 // В simple-news.js добавьте:
 async function handleImageUpload(input) {
     if (!input.files || !input.files[0]) return;
@@ -166,7 +225,10 @@ window.createPost = async function() {
 window.loadNewsPosts = async function() {
     try {
         const container = document.getElementById('newsPosts');
-        if (!container) return;
+        if (!container) {
+            console.warn('Контейнер newsPosts не найден');
+            return;
+        }
         
         container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Загрузка новостей...</p></div>';
         
@@ -180,13 +242,8 @@ window.loadNewsPosts = async function() {
         window.newsPosts = posts || [];
         window.renderNewsPosts(window.newsPosts);
         
-        // Показываем кнопку для админов
-        if (window.currentUserRole === 'admin' || window.currentUserRole === 'owner') {
-            const btn = document.getElementById('createNewsBtn');
-            const header = document.querySelector('.admin-controls-header');
-            if (btn) btn.style.display = 'inline-block';
-            if (header) header.style.display = 'flex';
-        }
+        // Настраиваем кнопку для админов после загрузки новостей
+        setTimeout(setupCreateNewsButton, 100);
         
     } catch (error) {
         console.error('Ошибка загрузки новостей:', error);
@@ -252,37 +309,57 @@ window.renderNewsPosts = function(posts) {
 };
 
 /**
- * Открытие модального окна создания поста
+ * УНИВЕРСАЛЬНАЯ функция открытия модального окна создания поста
+ * Эта функция будет вызываться из разных мест
  */
 window.openCreatePostModal = function() {
-    console.log('Открытие окна создания новости');
+    console.log('Универсальная функция openCreatePostModal вызвана');
     
     if (window.currentUserRole !== 'admin' && window.currentUserRole !== 'owner') {
         alert('Только администраторы могут создавать новости');
         return;
     }
     
-    const modal = document.getElementById('createPostModal');
-    if (modal) {
+    // Пробуем найти разные модальные окна
+    const modalIds = ['createPostModal', 'newsEditorModal'];
+    let foundModal = null;
+    
+    for (const modalId of modalIds) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            foundModal = modal;
+            console.log('Найдено модальное окно:', modalId);
+            break;
+        }
+    }
+    
+    if (foundModal) {
         // Сбрасываем форму
-        document.getElementById('postTitle').value = '';
-        document.getElementById('postContent').value = '';
-        document.getElementById('postImage').value = '';
-        document.getElementById('postPublished').checked = true;
+        const titleInput = document.getElementById('postTitle') || document.getElementById('newsTitle');
+        const contentInput = document.getElementById('postContent') || document.getElementById('newsContent');
+        
+        if (titleInput) titleInput.value = '';
+        if (contentInput) contentInput.value = '';
         
         // Показываем модальное окно
-        modal.style.display = 'flex';
+        foundModal.style.display = 'flex';
         
-        // Настраиваем форму
-        const form = document.getElementById('createPostForm');
-        if (form) {
-            form.onsubmit = function(e) {
-                e.preventDefault();
-                window.createPost();
+        // Настраиваем обработчик закрытия
+        const closeButtons = foundModal.querySelectorAll('.close-modal');
+        closeButtons.forEach(btn => {
+            btn.onclick = function() {
+                foundModal.style.display = 'none';
             };
-        }
+        });
+        
+        // Фокусируемся на заголовке
+        setTimeout(() => {
+            if (titleInput) titleInput.focus();
+        }, 100);
+        
     } else {
-        alert('Модальное окно не найдено');
+        console.error('Ни одно модальное окно не найдено!');
+        alert('Модальное окно не найдено. Проверьте наличие элементов с ID: createPostModal или newsEditorModal');
     }
 };
 
@@ -290,20 +367,28 @@ window.openCreatePostModal = function() {
  * Закрытие модального окна
  */
 window.closeCreatePostModal = function() {
-    const modal = document.getElementById('createPostModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    console.log('Закрытие модального окна');
+    
+    // Пробуем закрыть все возможные модальные окна
+    const modalIds = ['createPostModal', 'newsEditorModal'];
+    
+    modalIds.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal && modal.style.display === 'flex') {
+            modal.style.display = 'none';
+            console.log('Закрыто окно:', modalId);
+        }
+    });
 };
 
 /**
- * Создание нового поста
+ * Создание нового поста (альтернативная версия)
  */
-window.createPost = async function() {
+window.createPostAlternative = async function() {
     const title = document.getElementById('postTitle').value.trim();
     const content = document.getElementById('postContent').value.trim();
     const published = document.getElementById('postPublished').checked;
-    const imageFile = document.getElementById('postImage').files[0];
+    const imageFile = document.getElementById('postImage')?.files[0];
     
     if (!title || !content) {
         alert('Заполните заголовок и содержание');
@@ -369,18 +454,45 @@ window.createPost = async function() {
  * Экранирование HTML
  */
 function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
+/**
+ * Показать уведомление (fallback)
+ */
+function showNotification(message, type = 'info') {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    if (typeof window.showNotification === 'function') {
+        window.showNotification(message, type);
+    } else {
+        alert(message);
+    }
+}
+
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', function() {
-    if (typeof _supabase !== 'undefined') {
-        window.initializeNews();
-    } else {
-        console.error('Supabase не загружен');
-    }
+    console.log('simple-news.js загружен');
+    
+    // Даем время на загрузку других скриптов
+    setTimeout(() => {
+        if (typeof _supabase !== 'undefined') {
+            console.log('Supabase доступен, инициализируем новости...');
+            window.initializeNews();
+        } else {
+            console.warn('Supabase не загружен, откладываем инициализацию новостей');
+            // Пробуем еще раз через 2 секунды
+            setTimeout(() => {
+                if (typeof _supabase !== 'undefined') {
+                    window.initializeNews();
+                } else {
+                    console.error('Supabase так и не загрузился');
+                }
+            }, 2000);
+        }
+    }, 500);
 });
 // В simple-news.js добавьте эту функцию рендеринга:
 function renderNewsPosts(posts) {
@@ -499,6 +611,8 @@ function renderNewsPosts(posts) {
  * Форматирование контента новости
  */
 function formatNewsContent(content) {
+    if (!content) return '';
+    
     // Заменяем переносы строк на <br>
     let formatted = escapeHtml(content).replace(/\n/g, '<br>');
     
@@ -568,4 +682,33 @@ function toggleNewsExpand(postId) {
             toggleIcon.style.transform = 'rotate(0deg)';
         }
     }
+}
+
+/**
+ * Форматирование времени (сколько прошло)
+ */
+function formatTimeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMinutes = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMinutes < 60) {
+        return `${diffMinutes} мин. назад`;
+    } else if (diffHours < 24) {
+        return `${diffHours} ч. назад`;
+    } else if (diffDays < 7) {
+        return `${diffDays} дн. назад`;
+    } else {
+        return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+    }
+}
+
+// Экспортируем дополнительные функции
+if (typeof window !== 'undefined') {
+    window.formatNewsContent = formatNewsContent;
+    window.toggleNewsExpand = toggleNewsExpand;
+    window.formatTimeAgo = formatTimeAgo;
 }
