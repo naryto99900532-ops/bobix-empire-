@@ -37,7 +37,121 @@ async function initializeManagementPage() {
         showNotification('Ошибка загрузки страницы. Попробуйте обновить страницу.', 'error');
     }
 }
+/**
+ * Скрипт управления панелью управления Bobix Corporation
+ * Обрабатывает навигацию, загрузку данных и административные функции
+ */
 
+// Глобальные переменные состояния
+let currentUser = null;
+let playersData = [];
+let usersData = [];
+
+/**
+ * Инициализация страницы управления
+ */
+async function initializeManagementPage() {
+    try {
+        console.log('=== ИНИЦИАЛИЗАЦИЯ СТРАНИЦЫ УПРАВЛЕНИЯ ===');
+        
+        // Проверяем авторизацию пользователя
+        await checkAuthAndRedirect();
+        
+        // Инициализируем систему ролей (если еще не инициализирована)
+        if (typeof window.initializeRoleSystem === 'function' && !window.isRoleLoaded) {
+            console.log('Инициализируем систему ролей...');
+            await window.initializeRoleSystem();
+        }
+        
+        // Загружаем данные пользователя
+        await loadUserData();
+        
+        // Настраиваем навигацию
+        setupNavigation();
+        
+        // Загружаем данные игроков
+        await loadPlayers();
+        
+        // Настраиваем обработчики событий
+        setupEventHandlers();
+        
+        // Обновляем UI в зависимости от роли (используем глобальную переменную)
+        updateUIByRole();
+        
+        console.log('=== СТРАНИЦА УПРАВЛЕНИЯ ИНИЦИАЛИЗИРОВАНА ===');
+        
+    } catch (error) {
+        console.error('Ошибка инициализации страницы управления:', error);
+        showNotification('Ошибка загрузки страницы. Попробуйте обновить страницу.', 'error');
+    }
+}
+
+/**
+ * Проверка авторизации и перенаправление если необходимо
+ */
+async function checkAuthAndRedirect() {
+    try {
+        const { data: { user }, error } = await _supabase.auth.getUser();
+        
+        if (error || !user) {
+            // Пользователь не авторизован, перенаправляем на главную
+            console.log('Пользователь не авторизован, перенаправление...');
+            window.location.href = 'index.html';
+            return;
+        }
+        
+        currentUser = user;
+        console.log('Пользователь авторизован:', user.email);
+        
+    } catch (error) {
+        console.error('Ошибка проверки авторизации:', error);
+        window.location.href = 'index.html';
+    }
+}
+
+/**
+ * Загрузка данных пользователя
+ */
+async function loadUserData() {
+    try {
+        if (!currentUser) return;
+        
+        console.log('Загрузка данных пользователя...');
+        
+        // Обновляем информацию в интерфейсе
+        const userNameElement = document.getElementById('userName');
+        const userAvatarElement = document.getElementById('userAvatar');
+        const userRoleElement = document.getElementById('userRole');
+        
+        if (userNameElement) {
+            // Используем глобальную роль из role-manager.js
+            const username = currentUser.user_metadata?.username || 
+                           currentUser.email?.split('@')[0] || 
+                           'Пользователь';
+            userNameElement.textContent = username;
+        }
+        
+        if (userAvatarElement) {
+            const initials = (currentUser.user_metadata?.username || 
+                            currentUser.email?.split('@')[0] || 
+                            'BC').substring(0, 2).toUpperCase();
+            userAvatarElement.textContent = initials;
+        }
+        
+        // Используем глобальную роль из role-manager.js
+        if (userRoleElement && window.currentUserRole) {
+            userRoleElement.textContent = getRoleDisplayName(window.currentUserRole);
+        }
+        
+        console.log('Данные пользователя загружены, роль:', window.currentUserRole);
+        
+    } catch (error) {
+        console.error('Ошибка загрузки данных пользователя:', error);
+    }
+}
+
+// Остальной код management.js остается без изменений...
+// [Вся остальная часть файла management.js остается ТОЧНО такой же, как в предоставленном вами коде]
 /**
  * Проверка авторизации и перенаправление если необходимо
  */
