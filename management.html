@@ -638,27 +638,29 @@
     </div>
 </div>
 
-    <!-- 1. Supabase и база -->
-<!-- В management.html -->
+ <!-- Подключение всех необходимых скриптов -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="db.js"></script>
 <script src="session-fix.js"></script>
 <script src="storage-fix.js"></script>
+<script src="role-manager.js"></script> <!-- НОВЫЙ ФАЙЛ -->
 <script src="news-editor.js"></script>
 <script src="simple-news.js"></script>
 <script src="admin-functions.js"></script>
 <script src="management.js"></script>
+
 <!-- Инициализация -->
 <script>
     // Инициализация при загрузке страницы
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Загрузка страницы управления...');
+        console.log('=== ЗАГРУЗКА СТРАНИЦЫ УПРАВЛЕНИЯ ===');
         
         // Проверяем доступность функций
         console.log('Проверка функций:');
         console.log('openCreatePostModal:', typeof window.openCreatePostModal);
-        console.log('closeCreatePostModal:', typeof window.closeCreatePostModal);
-        console.log('loadNewsPosts:', typeof window.loadNewsPosts);
+        console.log('initializeRoleSystem:', typeof window.initializeRoleSystem);
+        console.log('initializeNews:', typeof window.initializeNews);
+        console.log('Supabase:', typeof _supabase);
         
         // Добавляем обработчики для кнопок
         const createBtn = document.getElementById('createNewsBtn');
@@ -675,6 +677,7 @@
         
         // Инициализация страницы управления
         if (typeof initializeManagementPage === 'function') {
+            console.log('Запуск initializeManagementPage...');
             initializeManagementPage();
         } else {
             console.error('Функция initializeManagementPage не найдена!');
@@ -685,19 +688,18 @@
         }
     });
 </script>
-    <script>
-        // Инициализация при загрузке страницы
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeManagementPage();
-        });
-    </script>
 
-
-<!-- 6. Финальная инициализация -->
+<!-- Финальная инициализация -->
 <script>
     // Финальная проверка и инициализация
     setTimeout(function() {
         console.log('=== ФИНАЛЬНАЯ ИНИЦИАЛИЗАЦИЯ ===');
+        
+        // Проверяем систему ролей
+        if (!window.isRoleLoaded && typeof window.recheckUserRole === 'function') {
+            console.log('Система ролей не загружена, повторная проверка...');
+            window.recheckUserRole();
+        }
         
         // Проверяем ключевые функции
         const checkFunctions = ['openCreatePostModal', 'loadNewsPosts', 'logout'];
@@ -712,59 +714,36 @@
             }
         });
         
+        // Проверяем роль пользователя
+        console.log('Текущая роль пользователя:', window.currentUserRole || 'не определена');
+        
         if (!allGood) {
             console.warn('Не все функции загружены. Попытка восстановления...');
             
             // Создаем заглушки для отсутствующих функций
             if (typeof window.openCreatePostModal !== 'function') {
                 window.openCreatePostModal = function() {
-                    console.log('Используется fallback функция openCreatePostModal');
-                    
-                    // Пробуем найти модальное окно
-                    const modalIds = ['createPostModal', 'newsEditorModal'];
-                    
-                    for (const modalId of modalIds) {
-                        const modal = document.getElementById(modalId);
-                        if (modal) {
-                            modal.style.display = 'flex';
-                            console.log('Показано модальное окно:', modalId);
-                            
-                            // Фокусируемся на заголовке
-                            setTimeout(() => {
-                                const titleInput = modal.querySelector('#postTitle, #newsTitle');
-                                if (titleInput) titleInput.focus();
-                            }, 100);
-                            return;
-                        }
+                    const modal = document.getElementById('createPostModal');
+                    if (modal) {
+                        modal.style.display = 'flex';
+                    } else {
+                        alert('Для создания новостей обновите страницу (Ctrl+F5)');
                     }
-                    
-                    alert('Для создания новостей обновите страницу (Ctrl+F5) или проверьте консоль');
                 };
-                console.log('✅ Создана fallback функция openCreatePostModal');
             }
-            
-            if (typeof window.loadNewsPosts !== 'function') {
-                window.loadNewsPosts = function() {
-                    console.log('Fallback: перезагрузка страницы');
-                    location.reload();
-                };
-                console.log('✅ Создана fallback функция loadNewsPosts');
-            }
-        }
-        
-        // Инициализируем новости
-        if (typeof window.initializeNews === 'function') {
-            console.log('Инициализация новостей...');
-            setTimeout(() => window.initializeNews(), 500);
-        }
-        
-        // Инициализируем если есть функция
-        if (typeof initializeManagementPage === 'function') {
-            initializeManagementPage();
         }
         
         console.log('=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===');
-    }, 1000);
+        
+        // Принудительно обновляем UI через 3 секунды (на случай если роли загрузились позже)
+        setTimeout(() => {
+            if (typeof updateUIByRole === 'function') {
+                console.log('Принудительное обновление UI...');
+                updateUIByRole();
+            }
+        }, 3000);
+        
+    }, 2000);
 </script>
 </body>
 </html>
